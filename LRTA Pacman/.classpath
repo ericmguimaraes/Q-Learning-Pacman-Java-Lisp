@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/workspace_eclipse_pacman/Real-Time-Learning-Pacman/LRTA Pacman/lib/abcl.jar"/>
-	<classpathentry kind="lib" path="D:/workspace_eclipse_pacman/Real-Time-Learning-Pacman/LRTA Pacman/lib/abcl-contrib.jar"/>
+	<classpathentry kind="lib" path="D:/workspace_eclipse_pacman/Learning-Real-Time-Pacman/LRTA Pacman/lib/abcl.jar"/>
+	<classpathentry kind="lib" path="D:/workspace_eclipse_pacman/Learning-Real-Time-Pacman/LRTA Pacman/lib/abcl-contrib.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
