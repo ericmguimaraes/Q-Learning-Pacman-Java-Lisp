@@ -123,18 +123,44 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 	final int NONE = 0;
 	final int SUSPEND = 1; // stop/start
 	final int BOSS = 2; // boss
-	
-	/////**********************
-	///// PARAMETROS DO ERIC
-	/////**********************
-	private boolean pinte = false;
+
+	// ///**********************
+	// /// PARAMETROS DO ERIC
+	// ///**********************
+	private boolean pinte = true;
 	private int countGames = 0;
 	private int jogosSemPintar = 0;
 
 	// LISP PARAM
 	public static Interpreter interpreter;
 	public static org.armedbear.lisp.Package lispPackage;
-	public static final boolean gameModeLisp = false; // false = human play
+	public static boolean gameModeLisp = true; // false = human play /
+														// true = computer
+
+	private void configGame(int mode) {
+		switch (mode) {
+		case 0: //computer playing - no training
+			gameModeLisp = true;
+			pinte = true;
+			jogosSemPintar = 0;
+			break;
+		case 1: //computer playing - X rounds training
+			gameModeLisp = true;
+			pinte = false;
+			jogosSemPintar = 1000;
+			break;
+		case 2://human playing
+			gameModeLisp = false;
+			pinte = true;
+			jogosSemPintar = 0;
+			break;
+		default:
+			gameModeLisp = true;
+			pinte = true;
+			jogosSemPintar = 0;
+			break;
+		}
+	}
 
 	// //////////////////////////////////////////////
 	// initialize the object
@@ -142,7 +168,12 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 	// //////////////////////////////////////////////
 	public Pacman() {
 		super("LRTA* PAC MAN");
-
+		
+		// 0 computer playing - no training
+		// 1 computer playing - X rounds training
+		// 2 human playing
+		configGame(0);
+		
 		// init variables
 		hiScore = 0;
 
@@ -444,7 +475,7 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 		// System.out.println("update called");
 		if (gameState == INITIMAGE)
 			return;
-		//System.out.println(pac.iX + "," + pac.iY);
+		// System.out.println(pac.iX + "," + pac.iY);
 		// seperate the timer from update
 		if (signalMove != 0) {
 			// System.out.println("update by timer");
@@ -459,8 +490,8 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 			case STARTWAIT:
 				// if (pacKeyDir == ctables.UP) // the key to start game
 				gameState = RUNNING;
-				countGames = countGames+1;
-				System.out.println(countGames);
+				countGames = countGames + 1;
+				System.out.println(countGames + " Rounds");
 				if (countGames > jogosSemPintar)
 					pinte = true;
 				// else
@@ -570,8 +601,8 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 	public void run() {
 		while (true) {
 			try {
-				if(pinte)
-				Thread.sleep(timerPeriod);
+				if (pinte)
+					Thread.sleep(timerPeriod);
 			} catch (InterruptedException e) {
 				return;
 			}
