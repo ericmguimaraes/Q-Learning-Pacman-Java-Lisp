@@ -34,14 +34,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.sql.Array;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Random;
 
-import org.armedbear.lisp.*;
+import org.armedbear.lisp.Function;
+import org.armedbear.lisp.Interpreter;
+import org.armedbear.lisp.JavaObject;
+import org.armedbear.lisp.LispObject;
+import org.armedbear.lisp.Packages;
+import org.armedbear.lisp.Symbol;
 
 /**
  * the main class of the pacman game
@@ -124,11 +123,18 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 	final int NONE = 0;
 	final int SUSPEND = 1; // stop/start
 	final int BOSS = 2; // boss
+	
+	/////**********************
+	///// PARAMETROS DO ERIC
+	/////**********************
+	private boolean pinte = false;
+	private int countGames = 0;
+	private int jogosSemPintar = 0;
 
 	// LISP PARAM
 	public static Interpreter interpreter;
 	public static org.armedbear.lisp.Package lispPackage;
-	public static final boolean gameModeLisp = true; // false = human play
+	public static final boolean gameModeLisp = false; // false = human play
 
 	// //////////////////////////////////////////////
 	// initialize the object
@@ -156,7 +162,7 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 			interpreter = Interpreter.createInstance();
 			interpreter.eval("(load \"lispfunctions.lisp\")");
 			lispPackage = Packages.findPackage("CL-USER");
-			
+
 			interpreter.eval("( require 'java-collections )");
 
 		}
@@ -311,53 +317,56 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 		changePacRemain = 1;
 
 		paintUpdate(g);
+
 	}
 
 	void paintUpdate(Graphics g) {
 		// updating the frame
+		if (pinte) {
+			powerDot.draw();
 
-		powerDot.draw();
+			for (int i = 0; i < 4; i++)
+				ghosts[i].draw();
 
-		for (int i = 0; i < 4; i++)
-			ghosts[i].draw();
+			pac.draw();
 
-		pac.draw();
+			// display the offscreen
+			g.drawImage(offScreen, iMazeX + leftOffset, iMazeY + topOffset,
+					this);
 
-		// display the offscreen
-		g.drawImage(offScreen, iMazeX + leftOffset, iMazeY + topOffset, this);
+			// display extra information
+			if (changeHiScore == 1) {
+				imgHiScoreG.setColor(Color.black);
+				imgHiScoreG.fillRect(70, 0, 80, 16);
+				imgHiScoreG.setColor(Color.red);
+				imgHiScoreG.drawString(Integer.toString(hiScore), 70, 14);
+				g.drawImage(imgHiScore, 8 + leftOffset, 0 + topOffset, this);
 
-		// display extra information
-		if (changeHiScore == 1) {
-			imgHiScoreG.setColor(Color.black);
-			imgHiScoreG.fillRect(70, 0, 80, 16);
-			imgHiScoreG.setColor(Color.red);
-			imgHiScoreG.drawString(Integer.toString(hiScore), 70, 14);
-			g.drawImage(imgHiScore, 8 + leftOffset, 0 + topOffset, this);
-
-			changeHiScore = 0;
-		}
-
-		if (changeScore == 1) {
-			imgScoreG.setColor(Color.black);
-			imgScoreG.fillRect(70, 0, 80, 16);
-			imgScoreG.setColor(Color.green);
-			imgScoreG.drawString(Integer.toString(score), 70, 14);
-			g.drawImage(imgScore, 158 + leftOffset, 0 + topOffset, this);
-
-			changeScore = 0;
-		}
-
-		// update pac life info
-		if (changePacRemain == 1) {
-			int i;
-			for (i = 1; i < pacRemain; i++) {
-				g.drawImage(pac.imagePac[0][0], 16 * i + leftOffset,
-						canvasHeight - 18 + topOffset, this);
+				changeHiScore = 0;
 			}
-			g.drawImage(powerDot.imageBlank, 16 * i + leftOffset, canvasHeight
-					- 17 + topOffset, this);
 
-			changePacRemain = 0;
+			if (changeScore == 1) {
+				imgScoreG.setColor(Color.black);
+				imgScoreG.fillRect(70, 0, 80, 16);
+				imgScoreG.setColor(Color.green);
+				imgScoreG.drawString(Integer.toString(score), 70, 14);
+				g.drawImage(imgScore, 158 + leftOffset, 0 + topOffset, this);
+
+				changeScore = 0;
+			}
+
+			// update pac life info
+			if (changePacRemain == 1) {
+				int i;
+				for (i = 1; i < pacRemain; i++) {
+					g.drawImage(pac.imagePac[0][0], 16 * i + leftOffset,
+							canvasHeight - 18 + topOffset, this);
+				}
+				g.drawImage(powerDot.imageBlank, 16 * i + leftOffset,
+						canvasHeight - 17 + topOffset, this);
+
+				changePacRemain = 0;
+			}
 		}
 	}
 
@@ -374,9 +383,9 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
 		if (gameModeLisp) {
-			int n =	randomLisp();
+			int n = randomLisp();
 			k = pac.move(n);
-			//System.out.println("n: "+n+" realdir: "+pac.realDir);
+			// System.out.println("n: "+n+" realdir: "+pac.realDir);
 		} else {
 			k = pac.move(pacKeyDir);
 		}
@@ -435,7 +444,7 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 		// System.out.println("update called");
 		if (gameState == INITIMAGE)
 			return;
-
+		//System.out.println(pac.iX + "," + pac.iY);
 		// seperate the timer from update
 		if (signalMove != 0) {
 			// System.out.println("update by timer");
@@ -450,6 +459,10 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 			case STARTWAIT:
 				// if (pacKeyDir == ctables.UP) // the key to start game
 				gameState = RUNNING;
+				countGames = countGames+1;
+				System.out.println(countGames);
+				if (countGames > jogosSemPintar)
+					pinte = true;
 				// else
 				// return;
 				break;
@@ -557,6 +570,7 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 	public void run() {
 		while (true) {
 			try {
+				if(pinte)
 				Thread.sleep(timerPeriod);
 			} catch (InterruptedException e) {
 				return;
@@ -620,9 +634,10 @@ public class Pacman extends Frame implements Runnable, KeyListener,
 		try {
 			Symbol random = lispPackage.findAccessibleSymbol("RAN");
 			Function randomFunction = (Function) random.getSymbolFunction();
-			LispObject result = randomFunction.execute(new JavaObject(pac.realDir));
+			LispObject result = randomFunction.execute(new JavaObject(
+					pac.realDir));
 			int n = result.intValue();
-			//System.out.println("lasdir "+ 0+ " resultado: "+n );
+			// System.out.println("lasdir "+ 0+ " resultado: "+n );
 			return n;
 		} catch (Throwable t) {
 			t.printStackTrace();
