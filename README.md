@@ -1,4 +1,4 @@
-# Learning-Real-Time-Pacman
+# Q-Learning-Pacman-Java-Lisp
 
 It is blabalbla to do
 
