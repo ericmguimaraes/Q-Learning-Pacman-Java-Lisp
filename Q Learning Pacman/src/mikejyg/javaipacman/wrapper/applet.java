@@ -23,42 +23,37 @@ import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.*;
 
-import mikejyg.javaipacman.pacman.Pacman;
+import mikejyg.javaipacman.pacman.GamePlayState;
 
 /**
  * a java applet class for pacman
  */
-public class applet extends Applet
-implements ActionListener
-{
+public class applet extends Applet implements ActionListener {
 	private static final long serialVersionUID = -749993332452315528L;
 
-	static Pacman pacMan=null;
+	static GamePlayState pacMan = null;
 
-	public void init()
-	{
-		setSize(50,50);
+	public void init() {
+		setSize(50, 50);
 		// create button
 		setLayout(new FlowLayout(FlowLayout.CENTER));
-		Button play=new Button("PLAY");
+		Button play = new Button("PLAY");
 		add(play);
 
 		play.addActionListener(this);
 
-		//      newGame();
+		// newGame();
 	}
 
-	void newGame()
-	{
-		pacMan=new Pacman();
+	void newGame() {
+		pacMan = new GamePlayState();
 	}
 
-	/////////////////////////////////////////////////
+	// ///////////////////////////////////////////////
 	// handles button event
-	/////////////////////////////////////////////////
-	public void actionPerformed(ActionEvent e)
-	{
-		if ( pacMan != null && ! pacMan.isFinalized() )
+	// ///////////////////////////////////////////////
+	public void actionPerformed(ActionEvent e) {
+		if (pacMan != null && !pacMan.isFinalized())
 			// another is running
 			return;
 		newGame();

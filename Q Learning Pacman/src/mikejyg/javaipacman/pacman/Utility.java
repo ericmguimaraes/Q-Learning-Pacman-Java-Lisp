@@ -17,18 +17,34 @@
  * along with javaiPacman.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package mikejyg.javaipacman.wrapper;
-
-import mikejyg.javaipacman.pacman.GamePlayState;
+package mikejyg.javaipacman.pacman;
 
 /**
- * the java application class of pacman
+ * provide some global public utility functions
  */
-public class app {
-	static GamePlayState game;
+public class Utility {
+	public static int RandDo(int iOdds)
+	// see if it happens within a probability of 1/odds
+	{
+		if (Math.random() * iOdds < 1)
+			return (1);
+		return (0);
+	}
 
-	public static void main(String[] args) {
-		game = new GamePlayState();
-		// System.out.println("main done.");
+	// return a random number within [0..iTotal)
+	public static int RandSelect(int iTotal) {
+		double a;
+		a = Math.random();
+		a = a * iTotal;
+		return ((int) a);
+	}
+
+	public static int IntSign(int iD) {
+		if (iD == 0)
+			return (0);
+		if (iD > 0)
+			return (1);
+		else
+			return (-1);
 	}
 }
