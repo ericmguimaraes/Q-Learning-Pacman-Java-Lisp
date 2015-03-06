@@ -23,7 +23,7 @@ import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.*;
 
-import mikejyg.javaipacman.pacman.GamePlayState;
+import eguimaraes.qlearning.pacman.GamePlayState;
 
 /**
  * a java applet class for pacman
