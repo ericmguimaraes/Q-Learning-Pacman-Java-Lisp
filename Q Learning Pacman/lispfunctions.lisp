@@ -11,8 +11,22 @@
 	 (result (jcall method javaobj str)))
     result))
 
-(defun test()
-  (call-java "test" "imprimiu")
+(defun string-to-list (string)
+  (mapcar #'parse-integer (split-by-one-space string))
+)
+
+(defun split-by-one-space (string)
+    "Returns a list of substrings of string
+divided by ONE space each.
+Note: Two consecutive spaces will be seen as
+if there were an empty string between them."
+    (loop for i = 0 then (1+ j)
+          as j = (position #\Space string :start i)
+          collect (subseq string i j)
+          while j))
+
+(defun list-to-string (lst)
+    (format nil "~{~A~^,~}" lst)
 )
 
 (defun ran (dir)
@@ -32,17 +46,6 @@
 	)
 )
 
-(defun string-to-list (string)
-  (mapcar #'parse-integer (split-by-one-space string))
+(defun test()
+  (call-java "test" (list-to-string '(1 2 3 4)))
 )
-
-(defun split-by-one-space (string)
-    "Returns a list of substrings of string
-divided by ONE space each.
-Note: Two consecutive spaces will be seen as
-if there were an empty string between them."
-    (loop for i = 0 then (1+ j)
-          as j = (position #\Space string :start i)
-          collect (subseq string i j)
-          while j))
-

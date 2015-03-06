@@ -195,7 +195,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		setSize(canvasWidth, canvasHeight);
 			
 		// LISP
-		lisp = LispFunction.getInstance();
+		lisp = LispFunction.getInstance(this);
 			
 		show();
 		// System.out.println("cpcman done");
