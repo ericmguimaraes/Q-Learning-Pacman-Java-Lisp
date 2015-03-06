@@ -406,7 +406,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// //////////////////////////////////////////////////////////
 	void move() {
 		int k;
-
+		lisp.calltest();
 		int oldScore = score;
 
 		for (int i = 0; i < 4; i++)

@@ -1,3 +1,20 @@
+(defparameter javaobj 0)
+
+(defun init(param)
+  (setf javaobj param)
+)
+
+(defun call-java (javamethod str)
+  (let* ((class (jclass "eguimaraes.qlearning.pacman.LispFunction"))
+	 (strclass (jclass "java.lang.String"))
+	 (method (jmethod class javamethod strclass))
+	 (result (jcall method javaobj str)))
+    result))
+
+(defun test()
+  (call-java "test" "imprimiu")
+)
+
 (defun ran (dir)
     ;;(print (jarray-ref-raw (jobject-lisp-value dir) 0))
     (defparameter last-dir (jobject-lisp-value dir))
@@ -29,9 +46,3 @@ if there were an empty string between them."
           collect (subseq string i j)
           while j))
 
-(defun call-java (param)
-  (let* ((class (jclass "Main"))
-	 (intclass (jclass "int"))
-	 (method (jmethod class "addTwoNumbers" intclass intclass))
-	 (result (jcall method param 2 4)))
-    (format t "in void-function, result of calling addTwoNumbers(2, 4): ~a~%" result)))

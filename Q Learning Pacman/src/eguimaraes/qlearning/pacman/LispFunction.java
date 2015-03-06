@@ -1,9 +1,7 @@
 package eguimaraes.qlearning.pacman;
 
-import org.armedbear.lisp.Function;
 import org.armedbear.lisp.JavaObject;
 import org.armedbear.lisp.LispObject;
-import org.armedbear.lisp.Symbol;
 
 public class LispFunction {
 
@@ -13,6 +11,7 @@ public class LispFunction {
 
 	private LispFunction() {
 		connection = LispConnection.getInstance();
+		connection.getFunction("INIT").execute(new JavaObject(this));
 	}
 
 	public static LispFunction getInstance() {
@@ -38,4 +37,11 @@ public class LispFunction {
 		return str;
 	}
 
+	public void test(String str) {
+		System.out.println(str);
+	}
+	
+	public void calltest() {
+		connection.getFunction("test").execute();
+	}
 }

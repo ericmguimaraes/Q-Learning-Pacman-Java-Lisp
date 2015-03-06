@@ -35,7 +35,7 @@ public class LispConnection {
 	}
 	
 	public Function getFunction(String name){
-		return (Function) getLispPackage().findAccessibleSymbol(name).getSymbolFunction();
+		return (Function) getLispPackage().findAccessibleSymbol(name.toUpperCase()).getSymbolFunction();
 	}
 
 }
