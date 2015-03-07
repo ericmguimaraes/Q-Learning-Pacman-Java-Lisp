@@ -36,11 +36,7 @@ public class GhostSpeed {
 	float frameStepRatio;
 
 	GhostSpeed() {
-		if (GamePlayState.gameModeLisp) {
 			start(1, 1);
-		} else {
-			start(1, 1);
-		}
 	}
 
 	public void start(int s, int f) throws Error {

@@ -128,6 +128,9 @@ public class Pacman {
 				powerDot.eat(iX / 16, iY / 16);
 				maze.iMaze[iY / 16][iX / 16] = Maze.BLANK;
 				break;
+			case Maze.BLANK:
+				eaten = 3;
+				break;
 			}
 
 			if (maze.iMaze[iY / 16 + Tables.iYDirection[iDir]][iX / 16

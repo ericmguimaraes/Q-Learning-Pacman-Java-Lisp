@@ -52,7 +52,7 @@ public class LispFunction {
 	public void test(String str) {
 		System.out.println(stringToArray(str).toString());
 	}
-	
+	 
 	public void calltest() {
 		connection.getFunction("test").execute();
 	}

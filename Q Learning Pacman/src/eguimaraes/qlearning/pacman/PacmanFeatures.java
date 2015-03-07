@@ -48,19 +48,19 @@ public class PacmanFeatures extends Features {
 
 	@Override
 	public String toString() {
-//		return "closestFoodDistance: "+ closestFoodDistance+" "+
-//				"numGhost1stepAway: "+ numGhost1stepAway+" "+
-//				"eatDot: "+ eatDot+" "+
-//				"eatPowerDot: "+ eatPowerDot+" "+
-//				"eatGhost: "+ eatGhost+" "+
-//				"closestGhostToEatDistance: "+ closestGhostToEatDistance;
+		return "closestFoodDistance: "+ closestFoodDistance+" "+
+				"numGhost1stepAway: "+ numGhost1stepAway+" "+
+				"eatDot: "+ eatDot+" "+
+				"eatPowerDot: "+ eatPowerDot+" "+
+				"eatGhost: "+ eatGhost+" "+
+				"closestGhostToEatDistance: "+ closestGhostToEatDistance;
 		
 		
-		return closestFoodDistance+" "+
-		numGhost1stepAway+" "+
-		eatDot+" "+
-		eatPowerDot+" "+
-		eatGhost+" "+
-		closestGhostToEatDistance;
+//		return closestFoodDistance+" "+
+//		numGhost1stepAway+" "+
+//		eatDot+" "+
+//		eatPowerDot+" "+
+//		eatGhost+" "+
+//		closestGhostToEatDistance;
 	}
 }

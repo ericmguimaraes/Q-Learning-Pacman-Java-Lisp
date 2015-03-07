@@ -83,6 +83,7 @@ public class FeaturesExtraction {
 	public int getNumGhost1stepAway(int x, int y) {
 		int countGhost = 0;
 		for (int i = 0; i < game.ghosts.length; i++) {
+			if(game.ghosts[i].iStatus == Ghost.BLIND) continue;
 			if(toHouseSize(game.ghosts[i].iX)==x+1 && toHouseSize(game.ghosts[i].iY)==y)
 				countGhost=countGhost+1;
 			if(toHouseSize(game.ghosts[i].iX)==x-1 && toHouseSize(game.ghosts[i].iY)==y)
@@ -138,6 +139,18 @@ public class FeaturesExtraction {
 		x = toHouseSize(x); y=toHouseSize(y);
 		int newx = getNewPosition(x, y, action)[0], newy= getNewPosition(x, y, action)[1];
 		//System.out.println(newx+" "+newy+" "+action);
+		PacmanFeatures result = new PacmanFeatures();
+		result.setClosestFoodDistance(getClosestFoodDistance(newx, newy));
+		result.setClosestGhostToEatDistance(getClosestGhostToEatDistance(newx, newy));
+		result.setEatDot(getEatDot(newx, newy));
+		result.setEatGhost(getEatGhost(newx, newy));
+		result.setEatPowerDot(getEatPowerDot(newx, newy));
+		result.setNumGhost1stepAway(getNumGhost1stepAway(newx, newy));
+		return result;
+	}
+	
+	public PacmanFeatures getFeatures(int x, int y) {
+		int newx = toHouseSize(x), newy= toHouseSize(y);
 		PacmanFeatures result = new PacmanFeatures();
 		result.setClosestFoodDistance(getClosestFoodDistance(newx, newy));
 		result.setClosestGhostToEatDistance(getClosestGhostToEatDistance(newx, newy));

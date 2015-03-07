@@ -42,6 +42,8 @@ import org.armedbear.lisp.LispObject;
 import org.armedbear.lisp.Packages;
 import org.armedbear.lisp.Symbol;
 
+import eguimaraes.qlearning.pacman.Reward.RewardType;
+
 /**
  * the main class of the pacman game
  */
@@ -132,6 +134,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	private int jogosSemPintar = 0;
 	public static final int houseSize = 16;
 	public FeaturesExtraction features;
+	public final int turnDuration = 44;
+	public int framesPerAction = turnDuration;
+	public static Reward lastReward = new Reward(RewardType.WALK);
+	public static Features lastFeatures;
+	
 
 	// LISP PARAM
 	LispFunction lisp;
@@ -184,7 +191,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		// 1 computer playing - X rounds training
 		// 2 human playing
 		// 3 computer playing - 20 rounds training
-		configGame(3);
+		configGame(2);
 		//lisp.calltest();
 
 		// init variables
@@ -355,7 +362,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	}
 
-	void paintUpdate(Graphics g) {
+	void paintUpdate(Graphics g) {		
 		// updating the frame
 		if (pinte) {
 			powerDot.draw();
@@ -418,21 +425,35 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		if (gameModeLisp) {
 			int n = lisp.requestRandomMove(pac);
-			//System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
+			if(framesPerAction==0){
+				//System.out.println(lastReward.getRewardType()+": "+lastReward.toString());
+				System.out.println(features.getFeatures(pac.iX,pac.iY,n));
+			}
 			k = pac.move(n);
 			// System.out.println("n: "+n+" realdir: "+pac.realDir);
 		} else {
-			//System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
+			if(framesPerAction==0){
+				System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
+			}
 			k = pac.move(pacKeyDir);
 		}
-
+		
+		System.out.println(pac.iX%16+" "+pac.iY%16);
+		if(pac.iX%16==0 && pac.iY%16==0){
+			System.out.println(lastReward.getRewardType()+": "+lastReward.toString());
+		}
+		
 		if (k == 1) // eaten a dot
 		{
 			changeScore = 1;
 			score += 10 * ((round + 1) / 2);
+			lastReward = new Reward(RewardType.DOT);
 		} else if (k == 2) // eaten a powerDot
-		{
+		{	
+			lastReward = new Reward(RewardType.POWER_DOT);
 			scoreGhost = 200;
+		} else if (k == 3 && pac.iX%16==0 && pac.iY%16==0){
+			lastReward = new Reward(RewardType.WALK);
 		}
 
 		if (maze.iTotalDotcount == 0) {
@@ -447,6 +468,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			k = ghosts[i].testCollision(pac.iX, pac.iY);
 			if (k == 1) // kill pac
 			{
+				lastReward = new Reward(RewardType.DIE);
 				pacRemain--;
 				changePacRemain = 1;
 				gameState = DEADWAIT; // stop the game
@@ -454,10 +476,14 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				return;
 			} else if (k == 2) // caught by pac
 			{
+				lastReward = new Reward(RewardType.EAT_GHOST);
 				score += scoreGhost * ((round + 1) / 2);
 				changeScore = 1;
 				scoreGhost *= 2;
 			}
+		
+			
+
 		}
 
 		if (score > hiScore) {
@@ -478,6 +504,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// /////////////////////////////////////////
 	public void update(Graphics g) {
 		// System.out.println("update called");
+		framesPerAction = framesPerAction-1;
+		if(framesPerAction<0)framesPerAction=turnDuration;
+		
 		if (gameState == INITIMAGE)
 			return;
 		// System.out.println(pac.iX + "," + pac.iY);
@@ -624,7 +653,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public void dispose() {
 		// timer.stop(); // deprecated
 		// kill the thread
-		timer.interrupt();
+		//timer.interrupt();
 
 		// the off screen canvas
 		// Image offScreen=null;
