@@ -37,7 +37,7 @@ public class GhostSpeed {
 
 	GhostSpeed() {
 		if (GamePlayState.gameModeLisp) {
-			start(1, 3);
+			start(1, 1);
 		} else {
 			start(1, 1);
 		}

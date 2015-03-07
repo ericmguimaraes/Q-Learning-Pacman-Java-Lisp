@@ -130,10 +130,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	private boolean pinte = true;
 	private int countGames = 0;
 	private int jogosSemPintar = 0;
+	public static final int houseSize = 16;
+	public FeaturesExtraction features;
 
 	// LISP PARAM
 	LispFunction lisp;
-	
+
 	public static boolean gameModeLisp = true; // false = human play /
 												// true = computer
 
@@ -158,7 +160,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			gameModeLisp = true;
 			pinte = false;
 			jogosSemPintar = 20;
-			break;	
+			break;
 		default:
 			gameModeLisp = true;
 			pinte = true;
@@ -174,10 +176,15 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public GamePlayState() {
 		super("LRTA* PAC MAN");
 
+		// LISP
+		lisp = LispFunction.getInstance(this);
+		features = FeaturesExtraction.getInstance(this);
+
 		// 0 computer playing - no training
 		// 1 computer playing - X rounds training
 		// 2 human playing
-		configGame(3);
+		configGame(2);
+		lisp.calltest();
 
 		// init variables
 		hiScore = 0;
@@ -193,10 +200,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		about.addActionListener(this);
 
 		setSize(canvasWidth, canvasHeight);
-			
-		// LISP
-		lisp = LispFunction.getInstance(this);
-			
+
 		show();
 		// System.out.println("cpcman done");
 
@@ -406,17 +410,18 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// //////////////////////////////////////////////////////////
 	void move() {
 		int k;
-		lisp.calltest();
 		int oldScore = score;
 
 		for (int i = 0; i < 4; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
-		
+
 		if (gameModeLisp) {
 			int n = lisp.requestRandomMove(pac);
+			//System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
 			k = pac.move(n);
 			// System.out.println("n: "+n+" realdir: "+pac.realDir);
 		} else {
+			//System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
 			k = pac.move(pacKeyDir);
 		}
 

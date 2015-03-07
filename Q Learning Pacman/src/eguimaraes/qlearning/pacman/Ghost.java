@@ -23,10 +23,10 @@ import java.lang.Error;
 import java.awt.*;
 
 public class Ghost {
-	final int IN = 0;
-	final int OUT = 1;
-	final int BLIND = 2;
-	final int EYE = 3;
+	public static final int IN = 0;
+	public static final int OUT = 1;
+	public static final int BLIND = 2;
+	public static final int EYE = 3;
 
 	final int[] steps = { 7, 7, 1, 1 };
 	final int[] frames = { 8, 8, 2, 1 };
