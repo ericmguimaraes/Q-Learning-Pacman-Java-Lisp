@@ -183,8 +183,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		// 0 computer playing - no training
 		// 1 computer playing - X rounds training
 		// 2 human playing
-		configGame(2);
-		lisp.calltest();
+		// 3 computer playing - 20 rounds training
+		configGame(3);
+		//lisp.calltest();
 
 		// init variables
 		hiScore = 0;
@@ -495,9 +496,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				// if (pacKeyDir == Tables.UP) // the key to start game
 				gameState = RUNNING;
 				countGames = countGames + 1;
-				System.out.println(countGames + " Rounds");
-				if (countGames > jogosSemPintar)
+				if (countGames > jogosSemPintar){
+					if(!pinte)System.out.println(countGames+" Rounds Played");
 					pinte = true;
+				}
 				// else
 				// return;
 				break;

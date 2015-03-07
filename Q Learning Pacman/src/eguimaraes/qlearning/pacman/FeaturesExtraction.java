@@ -137,7 +137,7 @@ public class FeaturesExtraction {
 	public PacmanFeatures getFeatures(int x, int y, int action) {
 		x = toHouseSize(x); y=toHouseSize(y);
 		int newx = getNewPosition(x, y, action)[0], newy= getNewPosition(x, y, action)[1];
-		System.out.println(newx+" "+newy+" "+action);
+		//System.out.println(newx+" "+newy+" "+action);
 		PacmanFeatures result = new PacmanFeatures();
 		result.setClosestFoodDistance(getClosestFoodDistance(newx, newy));
 		result.setClosestGhostToEatDistance(getClosestGhostToEatDistance(newx, newy));
