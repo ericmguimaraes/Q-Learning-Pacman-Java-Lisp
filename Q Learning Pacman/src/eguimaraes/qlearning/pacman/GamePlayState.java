@@ -34,6 +34,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
 
 import org.armedbear.lisp.Function;
 import org.armedbear.lisp.Interpreter;
@@ -41,6 +42,8 @@ import org.armedbear.lisp.JavaObject;
 import org.armedbear.lisp.LispObject;
 import org.armedbear.lisp.Packages;
 import org.armedbear.lisp.Symbol;
+
+import com.sun.org.apache.xalan.internal.utils.FeatureManager.Feature;
 
 import eguimaraes.qlearning.pacman.Reward.RewardType;
 
@@ -133,12 +136,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	private int countGames = 0;
 	private int jogosSemPintar = 0;
 	public static final int houseSize = 16;
-	public FeaturesExtraction features;
-	public final int turnDuration = 44;
-	public int framesPerAction = turnDuration;
-	public static Reward lastReward = new Reward(RewardType.WALK);
-	public static Features lastFeatures;
-	
+	public FeaturesExtraction featuresExtractor;
+	boolean rightSpotIn = false, rightSpotIn2 = false;
+	public ArrayList<Reward> rewards;
+	public ArrayList<Features> features;
+	public int lastAction;
 
 	// LISP PARAM
 	LispFunction lisp;
@@ -185,14 +187,17 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		// LISP
 		lisp = LispFunction.getInstance(this);
-		features = FeaturesExtraction.getInstance(this);
+		featuresExtractor = FeaturesExtraction.getInstance(this);
+		rewards = new ArrayList<Reward>();
+		features = new ArrayList<Features>();
+		lastAction = 0;
 
 		// 0 computer playing - no training
 		// 1 computer playing - X rounds training
 		// 2 human playing
 		// 3 computer playing - 20 rounds training
 		configGame(2);
-		//lisp.calltest();
+		// lisp.calltest();
 
 		// init variables
 		hiScore = 0;
@@ -362,7 +367,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	}
 
-	void paintUpdate(Graphics g) {		
+	void paintUpdate(Graphics g) {
 		// updating the frame
 		if (pinte) {
 			powerDot.draw();
@@ -423,37 +428,69 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		for (int i = 0; i < 4; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
+		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
+			if (!rightSpotIn) {
+				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK){
+					System.err.println("WALK");
+					rewards.add(new Reward(RewardType.WALK));
+				}
+				rightSpotIn = true;
+			}
+		} else {
+			rightSpotIn = false;
+		}
+
 		if (gameModeLisp) {
 			int n = lisp.requestRandomMove(pac);
-			if(framesPerAction==0){
-				//System.out.println(lastReward.getRewardType()+": "+lastReward.toString());
-				System.out.println(features.getFeatures(pac.iX,pac.iY,n));
-			}
+			System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, n));
 			k = pac.move(n);
-			// System.out.println("n: "+n+" realdir: "+pac.realDir);
 		} else {
-			if(framesPerAction==0){
-				System.out.println(features.getFeatures(pac.iX,pac.iY,pacKeyDir));
-			}
+			System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, pacKeyDir));
 			k = pac.move(pacKeyDir);
 		}
+
 		
-		System.out.println(pac.iX%16+" "+pac.iY%16);
-		if(pac.iX%16==0 && pac.iY%16==0){
-			System.out.println(lastReward.getRewardType()+": "+lastReward.toString());
-		}
+		//lastAction code
+//				k = 0;
+//				if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
+//					if (!rightSpotIn) {
+//						if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
+//							System.err.println("WALK");
+//							rewards.add(new Reward(RewardType.WALK));
+//						}
+//
+//						if (gameModeLisp) {
+//							int n = lisp.requestRandomMove(pac);
+//							System.out.println(featuresExtractor.getFeatures(pac.iX,
+//									pac.iY, n));
+//							lastAction = n;
+//							k = pac.move(n);
+//						} else {
+//							System.out.println(featuresExtractor.getFeatures(pac.iX,
+//									pac.iY, pacKeyDir));
+//							lastAction = pacKeyDir;
+//							k = pac.move(pacKeyDir);
+//						}
+//
+//						rightSpotIn = true;
+//					}
+//				} else {
+//					rightSpotIn = false;
+//					k = pac.move(lastAction);
+//				}
+		
 		
 		if (k == 1) // eaten a dot
 		{
 			changeScore = 1;
 			score += 10 * ((round + 1) / 2);
-			lastReward = new Reward(RewardType.DOT);
+			System.err.println("DOT");
+			rewards.add(new Reward(RewardType.DOT));
 		} else if (k == 2) // eaten a powerDot
-		{	
-			lastReward = new Reward(RewardType.POWER_DOT);
+		{
+			System.err.println("POWER_DOT");
+			rewards.add(new Reward(RewardType.POWER_DOT));
 			scoreGhost = 200;
-		} else if (k == 3 && pac.iX%16==0 && pac.iY%16==0){
-			lastReward = new Reward(RewardType.WALK);
 		}
 
 		if (maze.iTotalDotcount == 0) {
@@ -468,7 +505,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			k = ghosts[i].testCollision(pac.iX, pac.iY);
 			if (k == 1) // kill pac
 			{
-				lastReward = new Reward(RewardType.DIE);
+				System.err.println("DIE");
+				rewards.add(new Reward(RewardType.DIE));
+				System.err.println(">>>>>>>TESTE<<<<<<<");
+				for (int j = 0; j < rewards.size(); j++) {
+					System.err.println(rewards.get(j).toString());
+				}
 				pacRemain--;
 				changePacRemain = 1;
 				gameState = DEADWAIT; // stop the game
@@ -476,14 +518,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				return;
 			} else if (k == 2) // caught by pac
 			{
-				lastReward = new Reward(RewardType.EAT_GHOST);
+				System.err.println("EAT_GHOST");
+				rewards.add(new Reward(RewardType.EAT_GHOST));
 				score += scoreGhost * ((round + 1) / 2);
 				changeScore = 1;
 				scoreGhost *= 2;
 			}
-		
-			
-
 		}
 
 		if (score > hiScore) {
@@ -504,9 +544,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// /////////////////////////////////////////
 	public void update(Graphics g) {
 		// System.out.println("update called");
-		framesPerAction = framesPerAction-1;
-		if(framesPerAction<0)framesPerAction=turnDuration;
-		
+
 		if (gameState == INITIMAGE)
 			return;
 		// System.out.println(pac.iX + "," + pac.iY);
@@ -525,8 +563,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				// if (pacKeyDir == Tables.UP) // the key to start game
 				gameState = RUNNING;
 				countGames = countGames + 1;
-				if (countGames > jogosSemPintar){
-					if(!pinte)System.out.println(countGames+" Rounds Played");
+				if (countGames > jogosSemPintar) {
+					if (!pinte)
+						System.out.println(countGames + " Rounds Played");
 					pinte = true;
 				}
 				// else
@@ -653,7 +692,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public void dispose() {
 		// timer.stop(); // deprecated
 		// kill the thread
-		//timer.interrupt();
+		// timer.interrupt();
 
 		// the off screen canvas
 		// Image offScreen=null;

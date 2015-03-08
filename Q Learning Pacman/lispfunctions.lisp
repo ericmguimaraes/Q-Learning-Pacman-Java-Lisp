@@ -49,3 +49,4 @@
 (defun test()
   (call-java "test" (list-to-string '(1 2 3 4)))
 )
+
