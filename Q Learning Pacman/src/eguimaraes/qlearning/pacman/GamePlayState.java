@@ -190,13 +190,13 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		featuresExtractor = FeaturesExtraction.getInstance(this);
 		rewards = new ArrayList<Reward>();
 		features = new ArrayList<Features>();
-		lastAction = 0;
+		lastAction = 1;
 
 		// 0 computer playing - no training
 		// 1 computer playing - X rounds training
 		// 2 human playing
 		// 3 computer playing - 20 rounds training
-		configGame(2);
+		configGame(0);
 		// lisp.calltest();
 
 		// init variables
@@ -428,58 +428,61 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		for (int i = 0; i < 4; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
+		// if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
+		// if (!rightSpotIn) {
+		// if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK){
+		// System.err.println("WALK");
+		// rewards.add(new Reward(RewardType.WALK));
+		// }
+		// rightSpotIn = true;
+		// }
+		// } else {
+		// rightSpotIn = false;
+		// }
+
+		// if (gameModeLisp) {
+		// int n = lisp.requestRandomMove(pac);
+		// System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, n));
+		// k = pac.move(n);
+		// } else {
+		// System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY,
+		// pacKeyDir));
+		// k = pac.move(pacKeyDir);
+		// }
+
+		
+		System.out.println(rightSpotIn+" "+lastAction+" "+isPossibleWalk(pac.iX/16, pac.iY/16, lastAction));
+		// lastAction code
+		k = 0;
 		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
 			if (!rightSpotIn) {
-				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK){
+				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
 					System.err.println("WALK");
 					rewards.add(new Reward(RewardType.WALK));
 				}
+
+				if (gameModeLisp) {
+					int n = lisp.requestRandomMove(pac);
+					while(!isPossibleWalk(pac.iX/16, pac.iY/16, n)){
+						n = lisp.requestRandomMove(pac);
+					}
+					System.out.println(featuresExtractor.getFeatures(pac.iX,
+							pac.iY, n));
+					lastAction = n;
+				} else {
+					System.out.println(featuresExtractor.getFeatures(pac.iX,
+							pac.iY, pacKeyDir));
+					lastAction = pacKeyDir;
+				}
+
 				rightSpotIn = true;
 			}
 		} else {
 			rightSpotIn = false;
 		}
 
-		if (gameModeLisp) {
-			int n = lisp.requestRandomMove(pac);
-			System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, n));
-			k = pac.move(n);
-		} else {
-			System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, pacKeyDir));
-			k = pac.move(pacKeyDir);
-		}
+		k = pac.move(lastAction);
 
-		
-		//lastAction code
-//				k = 0;
-//				if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
-//					if (!rightSpotIn) {
-//						if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
-//							System.err.println("WALK");
-//							rewards.add(new Reward(RewardType.WALK));
-//						}
-//
-//						if (gameModeLisp) {
-//							int n = lisp.requestRandomMove(pac);
-//							System.out.println(featuresExtractor.getFeatures(pac.iX,
-//									pac.iY, n));
-//							lastAction = n;
-//							k = pac.move(n);
-//						} else {
-//							System.out.println(featuresExtractor.getFeatures(pac.iX,
-//									pac.iY, pacKeyDir));
-//							lastAction = pacKeyDir;
-//							k = pac.move(pacKeyDir);
-//						}
-//
-//						rightSpotIn = true;
-//					}
-//				} else {
-//					rightSpotIn = false;
-//					k = pac.move(lastAction);
-//				}
-		
-		
 		if (k == 1) // eaten a dot
 		{
 			changeScore = 1;
@@ -733,4 +736,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		this.finalized = finalized;
 	}
 
+	public boolean isPossibleWalk(int x, int y, int a){
+		if(maze.iMaze[featuresExtractor.getNewPosition(x, y, a)[1]][featuresExtractor.getNewPosition(x, y, a)[0]]==Maze.WALL
+				|| maze.iMaze[featuresExtractor.getNewPosition(x, y, a)[1]][featuresExtractor.getNewPosition(x, y, a)[0]]==Maze.DOOR){
+			return false;
+		}
+		return true;
+	}
 }
