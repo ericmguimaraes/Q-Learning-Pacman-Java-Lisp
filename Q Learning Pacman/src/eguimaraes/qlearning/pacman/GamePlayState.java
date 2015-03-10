@@ -141,6 +141,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public ArrayList<Reward> rewards;
 	public ArrayList<Features> features;
 	public int lastAction;
+	private int countRewards = 0;
 
 	// LISP PARAM
 	LispFunction lisp;
@@ -428,42 +429,19 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		for (int i = 0; i < 4; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
-		// if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
-		// if (!rightSpotIn) {
-		// if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK){
-		// System.err.println("WALK");
-		// rewards.add(new Reward(RewardType.WALK));
-		// }
-		// rightSpotIn = true;
-		// }
-		// } else {
-		// rightSpotIn = false;
-		// }
-
-		// if (gameModeLisp) {
-		// int n = lisp.requestRandomMove(pac);
-		// System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY, n));
-		// k = pac.move(n);
-		// } else {
-		// System.out.println(featuresExtractor.getFeatures(pac.iX, pac.iY,
-		// pacKeyDir));
-		// k = pac.move(pacKeyDir);
-		// }
-
-		
-		System.out.println(rightSpotIn+" "+lastAction+" "+isPossibleWalk(pac.iX/16, pac.iY/16, lastAction));
 		// lastAction code
 		k = 0;
 		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
-			if (!rightSpotIn) {
+			if (!rightSpotIn) { //all code inside of this if is called only one time in each turn
+				
 				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
 					System.err.println("WALK");
 					rewards.add(new Reward(RewardType.WALK));
 				}
-
+				
 				if (gameModeLisp) {
 					int n = lisp.requestRandomMove(pac);
-					while(!isPossibleWalk(pac.iX/16, pac.iY/16, n)){
+					while(!isPossibleWalk(pac.iX, pac.iY, n)){
 						n = lisp.requestRandomMove(pac);
 					}
 					System.out.println(featuresExtractor.getFeatures(pac.iX,
@@ -472,6 +450,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				} else {
 					System.out.println(featuresExtractor.getFeatures(pac.iX,
 							pac.iY, pacKeyDir));
+					while(!isPossibleWalk(pac.iX, pac.iY, pacKeyDir)){
+					}
 					lastAction = pacKeyDir;
 				}
 
@@ -588,6 +568,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				gameState = STARTWAIT;
 				wait = WAITCOUNT;
 				pacKeyDir = Tables.DOWN;
+				rightSpotIn=false;
+				rightSpotIn2=false;
 				break;
 			case SUSPENDED:
 				if (key == SUSPEND)
@@ -737,10 +719,22 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	}
 
 	public boolean isPossibleWalk(int x, int y, int a){
-		if(maze.iMaze[featuresExtractor.getNewPosition(x, y, a)[1]][featuresExtractor.getNewPosition(x, y, a)[0]]==Maze.WALL
-				|| maze.iMaze[featuresExtractor.getNewPosition(x, y, a)[1]][featuresExtractor.getNewPosition(x, y, a)[0]]==Maze.DOOR){
+		int[] newPosition = featuresExtractor.getNewPosition(x/16, y/16, a);
+		if(newPosition[0]==x/16 && newPosition[1]==y/16){
 			return false;
 		}
 		return true;
+	}
+	
+	//if you get two rewards in one turn this function will calculate that
+	public int getLastRewardsValue(){
+		int sum = 0, diference = rewards.size() - countRewards;
+		countRewards = rewards.size();
+		int i = rewards.size()-1;
+		while (i > rewards.size()-diference-1) {
+			sum = sum + rewards.get(i).getValue();
+			i--;
+		}
+		return sum;
 	}
 }

@@ -24,14 +24,11 @@ public class FeaturesExtraction {
 		//I had to invert the order of x and y because the first developer used this pattern
 		//which is completely out of the worldly math pattern to coordenates
 		//and I just saw it after write everything with the normal pattern 
-		int aux = x;
-		x=y;
-		y=aux;
-		
+	
 	int[] result = new int[2]; 
 		switch(action){
 			case 0: 
-				if(game.maze.iMaze[x+1][y]!=Maze.WALL && game.maze.iMaze[x+1][y]!=Maze.DOOR){
+				if(game.maze.iMaze[y][x+1]!=Maze.WALL && game.maze.iMaze[y][x+1]!=Maze.DOOR){
 					result[0] = x+1;
 				}else{
 					result[0] = x;
@@ -39,15 +36,15 @@ public class FeaturesExtraction {
 				result[1] = y;
 				break;
 			case 1: 
-				if(game.maze.iMaze[x][y+1]!=Maze.WALL && game.maze.iMaze[x][y+1]!=Maze.DOOR){
-					result[1] = y+1;
+				if(game.maze.iMaze[y-1][x]!=Maze.WALL && game.maze.iMaze[y-1][x]!=Maze.DOOR){
+					result[1] = y-1;
 				}else{
 					result[1] = y;
 				}
 				result[0] = x;
 				break;
 			case 2: 
-				if(game.maze.iMaze[x-1][y]!=Maze.WALL && game.maze.iMaze[x-1][y]!=Maze.DOOR){
+				if(game.maze.iMaze[y][x-1]!=Maze.WALL && game.maze.iMaze[y][x-1]!=Maze.DOOR){
 					result[0] = x-1;
 				}else{
 					result[0] = x;
@@ -55,17 +52,15 @@ public class FeaturesExtraction {
 				result[1] = y;
 				break;
 			case 3: 
-				if(game.maze.iMaze[x][y-1]!=Maze.WALL && game.maze.iMaze[x][y-1]!=Maze.DOOR){
-					result[1] = y-1;
+				if(game.maze.iMaze[y+1][x]!=Maze.WALL && game.maze.iMaze[y+1][x]!=Maze.DOOR){
+					result[1] = y+1;
 				}else{
 					result[1] = y;
 				}
 				result[0] = x;
 				break;
 		}
-		aux = result[0];
-		result[0]=result[1];
-		result[1]=aux;
+
 		return result;
 	}
 
@@ -91,6 +86,8 @@ public class FeaturesExtraction {
 			if(toHouseSize(game.ghosts[i].iX)==x && toHouseSize(game.ghosts[i].iY)==y+1)
 				countGhost=countGhost+1;
 			if(toHouseSize(game.ghosts[i].iX)==x && toHouseSize(game.ghosts[i].iY)==y-1)
+				countGhost=countGhost+1;
+			if(toHouseSize(game.ghosts[i].iX)==x && toHouseSize(game.ghosts[i].iY)==y)
 				countGhost=countGhost+1;
 		}
 		return countGhost;
