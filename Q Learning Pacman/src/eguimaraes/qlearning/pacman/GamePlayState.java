@@ -61,8 +61,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	int signalMove = 0;
 
 	// for graphics
-	final int canvasWidth = 368;
-	final int canvasHeight = 288 + 1;
+	int canvasWidth = 368;
+	int canvasHeight = (288 + 1);
 
 	// the canvas starting point within the frame
 	int topOffset;
@@ -146,35 +146,85 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// LISP PARAM
 	LispFunction lisp;
 
-	public static boolean gameModeLisp = true; // false = human play /
-												// true = computer
+	
+	//GAME DESIGN CONTROL
+	public static enum GameMode {
+		HUMAN, RANDOM, QLEARNING, QLEARNINGTRAINED;
+	}
 
-	private void configGame(int mode) {
-		switch (mode) {
-		case 0: // computer playing - no training
-			gameModeLisp = true;
+	public static enum GameDifficulty {
+		VERY_EASY, EASY, NORMAL, HARD, CUSTOM;
+	}
+	
+	public static GameMode gameMode;
+	public static GameDifficulty gameDifficulty;
+	public static int mapDesgin; // 1 or 2
+	public static int pacmanSpeed; // 1 to 4 - 1 == normal
+	public static int ghostBlindTime; //600 == normal
+	public static int ghostSpeed; // 1 to 4 - 2 == normal
+	public static int numberOfGhosts; //anything
+	public static boolean alwaysBlind = false; // ghosts alwaysBlind?
+
+	private void configGame(GameMode gm, GameDifficulty gd) {
+		gameMode = gm;
+		gameDifficulty = gd;
+
+		switch (gameMode) {
+		case HUMAN:
 			pinte = true;
 			jogosSemPintar = 0;
 			break;
-		case 1: // computer playing - X rounds training
-			gameModeLisp = true;
+		case RANDOM:
+			pinte = true;
+			jogosSemPintar = 0;
+			break;
+		case QLEARNING:
+			pinte = true;
+			jogosSemPintar = 0;
+			break;
+		case QLEARNINGTRAINED:
 			pinte = false;
-			jogosSemPintar = 1000;
+			jogosSemPintar = 200;
 			break;
-		case 2:// human playing
-			gameModeLisp = false;
-			pinte = true;
-			jogosSemPintar = 0;
+		}
+
+		switch (gameDifficulty) {
+		case VERY_EASY:
+			numberOfGhosts = 6;
+			ghostBlindTime = 5000; 
+			ghostSpeed = 1;
+			mapDesgin = 1;
+			pacmanSpeed = 1;
+			alwaysBlind = true;
 			break;
-		case 3:// lisp test
-			gameModeLisp = true;
-			pinte = false;
-			jogosSemPintar = 20;
+		case EASY:
+			numberOfGhosts = 2;
+			ghostBlindTime = 5000; 
+			ghostSpeed = 1;
+			mapDesgin = 1;
+			pacmanSpeed = 1;
 			break;
-		default:
-			gameModeLisp = true;
-			pinte = true;
-			jogosSemPintar = 0;
+		case NORMAL:
+			numberOfGhosts = 4;
+			ghostBlindTime = 600;
+			ghostSpeed = 2;
+			mapDesgin = 1;
+			pacmanSpeed = 1;
+			break;
+		case HARD:
+			numberOfGhosts = 4;
+			ghostBlindTime = 400;
+			ghostSpeed = 4;
+			mapDesgin = 1;
+			pacmanSpeed = 1;
+			break;
+		case CUSTOM:
+			numberOfGhosts = 10000;
+			ghostBlindTime = 5000;
+			ghostSpeed = 1; // 1 to 4 - 2 == normal
+			pacmanSpeed = 2;// 1 to 4 - 1 == normal
+			mapDesgin = 2;
+			alwaysBlind = false;
 			break;
 		}
 	}
@@ -184,7 +234,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// only called once at the beginning
 	// //////////////////////////////////////////////
 	public GamePlayState() {
-		super("LRTA* PAC MAN");
+		super("QLEARNING PAC MAN");
 
 		// LISP
 		lisp = LispFunction.getInstance(this);
@@ -193,11 +243,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		features = new ArrayList<Features>();
 		lastAction = 1;
 
-		// 0 computer playing - no training
-		// 1 computer playing - X rounds training
-		// 2 human playing
-		// 3 computer playing - 20 rounds training
-		configGame(0);
+		configGame(GameMode.HUMAN, GameDifficulty.CUSTOM);
+
 		// lisp.calltest();
 
 		// init variables
@@ -213,8 +260,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		about.addActionListener(this);
 
+		if(mapDesgin==2){
+			canvasWidth = canvasWidth*2;
+			canvasHeight = canvasHeight*2;
+		}
+		
 		setSize(canvasWidth, canvasHeight);
-
 		show();
 		// System.out.println("cpcman done");
 
@@ -237,28 +288,34 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	public void initImages() {
 		// initialize off screen drawing canvas
-		offScreen = createImage(Maze.iWidth, Maze.iHeight);
+		if(mapDesgin==2){
+			offScreen = createImage(Maze.iWidth*2, Maze.iHeight*2);
+		}else{
+			offScreen = createImage(Maze.iWidth, Maze.iHeight);
+		}
+		
+		
 		if (offScreen == null)
 			System.out.println("createImage failed");
 		offScreenG = offScreen.getGraphics();
 
 		// initialize maze object
-		maze = new Maze(this, offScreenG);
+		maze = new Maze(this, offScreenG, mapDesgin);
 
 		// initialize ghosts object
 		// 4 ghosts
-		ghosts = new Ghost[4];
+		ghosts = new Ghost[numberOfGhosts];
 		for (int i = 0; i < ghosts.length; i++) {
 			Color color;
-			if (i == 0)
+			if (i%4 == 0)
 				color = Color.red;
-			else if (i == 1)
+			else if (i%4 == 1)
 				color = Color.blue;
-			else if (i == 2)
+			else if (i%4 == 2)
 				color = Color.white;
 			else
 				color = Color.orange;
-			ghosts[i] = new Ghost(this, offScreenG, maze, color);
+			ghosts[i] = new Ghost(this, offScreenG, maze, color, ghostBlindTime, ghostSpeed, alwaysBlind);
 		}
 
 		// initialize power dot object
@@ -266,7 +323,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		// initialize pac object
 		// pac = new Pacman(this, offScreenG, maze, powerDot, ghosts);
-		pac = new Pacman(this, offScreenG, maze, powerDot);
+		pac = new Pacman(this, offScreenG, maze, powerDot, pacmanSpeed);
 
 		// initialize the score images
 		imgScore = createImage(150, 16);
@@ -319,8 +376,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		pac.start();
 		pacKeyDir = Tables.DOWN;
-		for (int i = 0; i < 4; i++)
-			ghosts[i].start(i, round);
+		for (int i = 0; i < ghosts.length; i++)
+			ghosts[i].start(i%4, round);
 
 		gameState = STARTWAIT;
 		wait = WAITCOUNT;
@@ -373,7 +430,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		if (pinte) {
 			powerDot.draw();
 
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < ghosts.length; i++)
 				ghosts[i].draw();
 
 			pac.draw();
@@ -426,39 +483,42 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		int k;
 		int oldScore = score;
 
-		for (int i = 0; i < 4; i++)
+		
+		
+		for (int i = 0; i < ghosts.length; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
 		// lastAction code
 		k = 0;
 		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
-			if (!rightSpotIn) { //all code inside of this if is called only one time in each turn
+			if (!rightSpotIn) { // all code inside of this if is called only one
+								// time in each turn
+
+				System.out.println(getLastRewardsValue());
 				
 				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
 					System.err.println("WALK");
 					rewards.add(new Reward(RewardType.WALK));
 				}
-				
-				if (gameModeLisp) {
+
+				if (gameMode == GameMode.RANDOM) {
 					int n = lisp.requestRandomMove(pac);
-					while(!isPossibleWalk(pac.iX, pac.iY, n)){
+					while (!isPossibleWalk(pac.iX, pac.iY, n)) {
 						n = lisp.requestRandomMove(pac);
 					}
-					System.out.println(featuresExtractor.getFeatures(pac.iX,
-							pac.iY, n));
+					//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, n));
 					lastAction = n;
-				} else {
-					System.out.println(featuresExtractor.getFeatures(pac.iX,
-							pac.iY, pacKeyDir));
-					while(!isPossibleWalk(pac.iX, pac.iY, pacKeyDir)){
-					}
-					lastAction = pacKeyDir;
-				}
+				} 
 
 				rightSpotIn = true;
 			}
 		} else {
 			rightSpotIn = false;
+		}
+		
+		if (gameMode == GameMode.HUMAN) {
+			//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, pacKeyDir));
+			lastAction = pacKeyDir;
 		}
 
 		k = pac.move(lastAction);
@@ -484,16 +544,16 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			return;
 		}
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < ghosts.length; i++) {
 			k = ghosts[i].testCollision(pac.iX, pac.iY);
 			if (k == 1) // kill pac
 			{
 				System.err.println("DIE");
 				rewards.add(new Reward(RewardType.DIE));
-				System.err.println(">>>>>>>TESTE<<<<<<<");
-				for (int j = 0; j < rewards.size(); j++) {
-					System.err.println(rewards.get(j).toString());
-				}
+//				System.err.println(">>>>>>>TESTE<<<<<<<");
+//				for (int j = 0; j < rewards.size(); j++) {
+//					System.err.println(rewards.get(j).toString());
+//				}
 				pacRemain--;
 				changePacRemain = 1;
 				gameState = DEADWAIT; // stop the game
@@ -568,8 +628,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				gameState = STARTWAIT;
 				wait = WAITCOUNT;
 				pacKeyDir = Tables.DOWN;
-				rightSpotIn=false;
-				rightSpotIn2=false;
+				rightSpotIn = false;
+				rightSpotIn2 = false;
 				break;
 			case SUSPENDED:
 				if (key == SUSPEND)
@@ -688,7 +748,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		maze = null;
 		pac = null;
 		powerDot = null;
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < ghosts.length; i++)
 			ghosts[i] = null;
 		ghosts = null;
 
@@ -718,23 +778,24 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		this.finalized = finalized;
 	}
 
-	public boolean isPossibleWalk(int x, int y, int a){
-		int[] newPosition = featuresExtractor.getNewPosition(x/16, y/16, a);
-		if(newPosition[0]==x/16 && newPosition[1]==y/16){
+	public boolean isPossibleWalk(int x, int y, int a) {
+		int[] newPosition = featuresExtractor.getNewPosition(x / 16, y / 16, a);
+		if (newPosition[0] == x / 16 && newPosition[1] == y / 16) {
 			return false;
 		}
 		return true;
 	}
-	
-	//if you get two rewards in one turn this function will calculate that
-	public int getLastRewardsValue(){
+
+	// if you get two rewards in one turn this function will calculate that
+	public int getLastRewardsValue() {
 		int sum = 0, diference = rewards.size() - countRewards;
 		countRewards = rewards.size();
-		int i = rewards.size()-1;
-		while (i > rewards.size()-diference-1) {
+		int i = rewards.size() - 1;
+		while (i > rewards.size() - diference - 1) {
 			sum = sum + rewards.get(i).getValue();
 			i--;
 		}
 		return sum;
 	}
+
 }

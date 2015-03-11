@@ -83,7 +83,7 @@ public class PowerDot {
 				clear(i);
 			}
 		}
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < ghosts.length; i++)
 			ghosts[i].blind();
 	}
 
@@ -98,7 +98,7 @@ public class PowerDot {
 				frameCount = iShowCount;
 			}
 		}
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < iX.length; i++) {
 			if (iValid[i] == 1 && showStatus == 1)
 				graphics.drawImage(imagePowerDot, iX[i] * 16, iY[i] * 16,
 						applet);

@@ -23,7 +23,7 @@ import java.awt.*;
 
 public class Pacman {
 	// frames to wait after eaten a dot
-	final int DOT_WAIT = 4;
+	final int DOT_WAIT = 3;
 
 	int iDotWait;
 
@@ -44,17 +44,20 @@ public class Pacman {
 
 	// the knowledge of the power dots
 	PowerDot powerDot;
+	
+	int speed=1;
 
 	public int realDir = 0;
 
 	// PacMove cAuto;
 
 	// Pacman(Window a, Graphics g, Maze m, PowerDot p, cghost cghost[])
-	Pacman(Window a, Graphics g, Maze m, PowerDot p) {
+	Pacman(Window a, Graphics g, Maze m, PowerDot p, int speed) {
 		applet = a;
 		graphics = g;
 		maze = m;
 		powerDot = p;
+		this.speed = speed;
 
 		// cAuto=new PacMove(this, cghost, m);
 
@@ -139,8 +142,8 @@ public class Pacman {
 			}
 		}
 		if (iDotWait == 0) {
-			iX += Tables.iXDirection[iDir];
-			iY += Tables.iYDirection[iDir];
+			iX += Tables.iXDirection[iDir]*speed;
+			iY += Tables.iYDirection[iDir]*speed;
 		} else
 			iDotWait--;
 		return (eaten);

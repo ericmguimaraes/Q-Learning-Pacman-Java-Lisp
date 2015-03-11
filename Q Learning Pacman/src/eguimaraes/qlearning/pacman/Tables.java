@@ -48,7 +48,8 @@ public class Tables {
 	public static final int DOWN = 3;
 
 	// the maze difinition string
-	public static final String[] MazeDefine = { "XXXXXXXXXXXXXXXXXXXXX", // 1
+	public static final String[] MazeDefine1 = { 
+			"XXXXXXXXXXXXXXXXXXXXX", // 1
 			"X.........X.........X", // 2
 			"XOXXX.XXX.X.XXX.XXXOX", // 3
 			"X......X..X.........X", // 4
@@ -66,4 +67,76 @@ public class Tables {
 			"XXXXXXXXXXXXXXXXXXXXX", // 16
 	};
 
+	
+//	public static final String[] MazeDefine = { 
+//		"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 1
+//		"X.........X.........XX.........X.........X", // 2
+//		"XOXXX.XXX.X.XXX.XXXOXXOXXX.XXX.X.XXX.XXXOX", // 3
+//		"X......X..X.........XX......X..X.........X", // 4
+//		"XXX.XX.X.XXX.XX.X.X.XXXX.XX.X.XXX.XX.X.X.X", // 5
+//		"X....X..........X.X.......X..........X.X.X", // 6
+//		"X.XX.X.XXX-XXX.XX.X.XX.XX.X.XXX-XXX.XX.X.X", // 7
+//		"X.XX.X.X     X......XX.XX.X.X     X......X", // 8
+//		"X.XX...X     X.XXXX.XX.XX...X     X.XXXX.X", // 9
+//		"X.XX.X.XXXXXXX.XXXX.XX.XX.X.XXXXXXX.XXXX.X", // 10
+//		"X....X.... ...............X.... .........X", // 11
+//		"XXX.XX.XXXXXXX.X.X.XXXXX.XX.XXXXXXX.X.X.XX", // 12
+//		"X.........X....X....XX.........X....X....X", // 13
+//		"XOXXXXXXX.X.XXXXXXXOXXOXXXXXXX.X.XXXXXXXOX", // 14
+//		"X...................XX...................X", // 15
+//		"XXXX.XXXXXXXXXX.XXXXXXXXX.XXXXXXXXXX.XXXXX", // 16
+//		"XXXX.XXXXXXXXXX.XXXXXXXXX.XXXXXXXXXX.XXXXX", // 1
+//		"X.........X.........XX.........X.........X", // 2
+//		"XOXXX.XXX.X.XXX.XXXOXXOXXX.XXX.X.XXX.XXXOX", // 3
+//		"X......X..X.........XX......X..X.........X", // 4
+//		"XXX.XX.X.XXX.XX.X.X.XXXX.XX.X.XXX.XX.X.X.X", // 5
+//		"X....X..........X.X.......X..........X.X.X", // 6
+//		"X.XX.X.XXX-XXX.XX.X.XX.XX.X.XXX-XXX.XX.X.X", // 7
+//		"X.XX.X.X     X......XX.XX.X.X     X......X", // 8
+//		"X.XX...X     X.XXXX.XX.XX...X     X.XXXX.X", // 9
+//		"X.XX.X.XXXXXXX.XXXX.XX.XX.X.XXXXXXX.XXXX.X", // 10
+//		"X....X.... ...............X.... .........X", // 11
+//		"XXX.XX.XXXXXXX.X.X.XXXXX.XX.XXXXXXX.X.X.XX", // 12
+//		"X.........X....X....XX.........X....X....X", // 13
+//		"XOXXXXXXX.X.XXXXXXXOXXOXXXXXXX.X.XXXXXXXOX", // 14
+//		"X...................XX...................X", // 15
+//		"XXXX.XXXXXXXXXX.XXXXXXXXX.XXXXXXXXXX.XXXXX", // 16
+//};
+	
+	
+	public static final String[] MazeDefine2 = { 
+		"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 1
+		"X.........X....................X.........X", // 2
+		"XOXXX.XXX.X.XXX.XXXOXXOXXX.XXX.X.XXX.XXXOX", // 3
+		"X......X..X.........XX......X..X.........X", // 4
+		"XXX.XX.X.XXX.XX.X.X.XXXX.XX.X.XXX.XX.X.X.X", // 5
+		"X....X..........X.X.XX....X..........X.X.X", // 6
+		"X.XX.X.XXX-XXX.XX.X.XX.XX.X.XXX-XXX.XX.X.X", // 7
+		"X.XX.X.X     X......XX.XX.X.X     X......X", // 8
+		"X.XX...X     X.XXXX.XX.XX...X     X.XXXX.X", // 9
+		"X.XX.X.XXXXXXX.XXXX.XX.XX.X.XXXXXXX.XXXX.X", // 10
+		"X....X.... ...............X.... .........X", // 11
+		"XXX.XX.XXXXXXX.X.X.XXXXX.XX.XXXXXXX.X.X.XX", // 12
+		"X.........X....X...............X....X....X", // 13
+		"XOXXXXXXX.X.XXXXXXXOXXOXXXXXXX.X.XXXXXXXOX", // 14
+		"X...................XX...................X", // 15
+		"XXX..XXXXXXXXXX..XXXXXXX..XXXXXXXXXX..XXXX", // 16
+		"XXX..XXXXXXXXXX..XXXXXXX..XXXXXXXXXX..XXXX", // 1
+		"X.........X....................X.........X", // 2
+		"XOXXX.XXX.X.XXX.XXXOXXOXXX.XXX.X.XXX.XXXOX", // 3
+		"X......X..X.........XX......X..X.........X", // 4
+		"XXX.XX.X.XXX.XX.X.X.XXXX.XX.X.XXX.XX.X.X.X", // 5
+		"X....X..........X.X.......X..........X.X.X", // 6
+		"X.XX.X.XXX-XXX.XX.X.XX.XX.X.XXX-XXX.XX.X.X", // 7
+		"X.XX.X.X     X......XX.XX.X.X     X......X", // 8
+		"X.XX...X     X.XXXX.XX.XX...X     X.XXXX.X", // 9
+		"X.XX.X.XXXXXXX.XXXX.XX.XX.X.XXXXXXX.XXXX.X", // 10
+		"X....X.... ...............X.... .........X", // 11
+		"XXX.XX.XXXXXXX.X.X.XXXXX.XX.XXXXXXX.X.X.XX", // 12
+		"X.........X....X....XX.........X....X....X", // 13
+		"XOXXXXXXX.X.XXXXXXXOXXOXXXXXXX.X.XXXXXXXOX", // 14
+		"X........................................X", // 15
+		"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // 16
+};
+	
 }

@@ -28,13 +28,14 @@ public class Ghost {
 	public static final int BLIND = 2;
 	public static final int EYE = 3;
 
-	final int[] steps = { 7, 7, 1, 1 };
-	final int[] frames = { 8, 8, 2, 1 };
+	int[] steps = { 7, 7, 1, 1 };
+	int[] frames = { 8, 8, 2, 1 };
 
-	final int INIT_BLIND_COUNT = 600; // remain blind for ??? frames
+	int INIT_BLIND_COUNT = 600; // remain blind for ??? frames
 	int blindCount;
 
 	GhostSpeed speed = new GhostSpeed();
+	private int factorSpeed = 1;
 
 	int iX, iY, iDir, iStatus;
 	int iBlink, iBlindCount;
@@ -54,12 +55,45 @@ public class Ghost {
 	Image imageGhost;
 	Image imageBlind;
 	Image imageEye;
+	
+	boolean alwaysBlind;
 
-	Ghost(Window a, Graphics g, Maze m, Color color) {
+	Ghost(Window a, Graphics g, Maze m, Color color, int blindTime,
+			int factorSpeed, boolean alwaysBlind) {
+		this.alwaysBlind = alwaysBlind;
 		applet = a;
 		graphics = g;
 		maze = m;
+		this.factorSpeed = factorSpeed;
+		switch (factorSpeed) {
+		case 1:
+			steps[0] = 5;
+			frames[0] = 8;
+			steps[1] = 5;
+			frames[1] = 8;
+			break;
+		case 2:
+			steps[0] = 7;
+			frames[0] = 8;
+			steps[1] = 7;
+			frames[1] = 8;
+			break;
+		case 3:
+			steps[0] = 8;
+			frames[0] = 8;
+			steps[1] = 8;
+			frames[1] = 8;
+			break;
+		default:
+			steps[0] = 7;
+			frames[0] = 8;
+			steps[1] = 7;
+			frames[1] = 8;
+			break;
+		}
 
+		INIT_BLIND_COUNT = blindTime;
+		
 		imageGhost = applet.createImage(18, 18);
 		ImagePac.drawGhost(imageGhost, 0, color);
 
@@ -99,6 +133,7 @@ public class Ghost {
 	}
 
 	public void move(int iPacX, int iPacY, int iPacDir) {
+		
 		if (iStatus == BLIND) {
 			iBlindCount--;
 			if (iBlindCount < blindCount / 3)
@@ -132,8 +167,13 @@ public class Ghost {
 		}
 
 		if (iStatus != EYE) {
-			iX += Tables.iXDirection[iDir];
-			iY += Tables.iYDirection[iDir];
+			if(factorSpeed==4){
+				iX += Tables.iXDirection[iDir]*2;
+				iY += Tables.iYDirection[iDir]*2;
+			}else{
+				iX += Tables.iXDirection[iDir];
+				iY += Tables.iYDirection[iDir];
+			}
 		} else {
 			iX += 2 * Tables.iXDirection[iDir];
 			iY += 2 * Tables.iYDirection[iDir];
@@ -182,6 +222,8 @@ public class Ghost {
 	public int OUTSelect(int iPacX, int iPacY, int iPacDir)
 	// count available directions
 			throws Error {
+		if(alwaysBlind)blind();
+		
 		int iM, i, iRand;
 		int iDirTotal = 0;
 		int[] iDirCount = new int[4];
@@ -232,8 +274,9 @@ public class Ghost {
 					}
 				}
 			}
-		} else
-			throw new Error("iDirTotal out of range");
+		} // MUDANCA TESTE BIG MAZE
+			// else
+			// throw new Error("iDirTotal out of range");
 		// exit(1);
 		return (iDir);
 	}

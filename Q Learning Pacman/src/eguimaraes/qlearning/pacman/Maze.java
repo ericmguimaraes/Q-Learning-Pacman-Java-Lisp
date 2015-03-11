@@ -30,11 +30,11 @@ public class Maze {
 	static final int DOT = 4;
 	static final int POWER_DOT = 8;
 
-	static final int HEIGHT = 16;
-	static final int WIDTH = 21;
+	static int HEIGHT = 16;
+	static int WIDTH = 21;
 
-	static final int iHeight = HEIGHT * 16;
-	static final int iWidth = WIDTH * 16;
+	static int iHeight = HEIGHT * 16;
+	static int iWidth = WIDTH * 16;
 
 	// the applet the object associate with
 	Window applet;
@@ -52,26 +52,50 @@ public class Maze {
 
 	// the status of maze
 	int[][] iMaze;
+	
+	int mapDesgin;
 
 	// initialize the maze
-	Maze(Window a, Graphics g) {
+	Maze(Window a, Graphics g, int lvl) {
 		// setup associations
 		applet = a;
 		graphics = g;
+		
+		this.mapDesgin = lvl;
 
+		if(lvl==2){
+			HEIGHT = 16*2;
+			WIDTH = 21*2;
+		}
+		
+		iHeight = HEIGHT * 16;
+		iWidth = WIDTH * 16;
+		
 		imageMaze = applet.createImage(iWidth, iHeight);
 		imageDot = applet.createImage(2, 2);
-
+		
 		// create data
 		iMaze = new int[HEIGHT][WIDTH];
 	}
-
+	
 	public void start() {
 		int i, j, k;
 		iTotalDotcount = 0;
+		String[] mazeDef = null;
+		switch (mapDesgin) {
+		case 1:
+			mazeDef = Tables.MazeDefine1;
+			break;
+		case 2:
+			mazeDef = Tables.MazeDefine2;
+			break;
+		default:
+			mazeDef = Tables.MazeDefine1;
+			break;
+		}
 		for (i = 0; i < HEIGHT; i++)
 			for (j = 0; j < WIDTH; j++) {
-				switch (Tables.MazeDefine[i].charAt(j)) {
+				switch (mazeDef[i].charAt(j)) {
 				case ' ':
 					k = BLANK;
 					break;
