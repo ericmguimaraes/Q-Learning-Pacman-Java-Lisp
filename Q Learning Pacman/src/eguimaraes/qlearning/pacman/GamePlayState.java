@@ -190,19 +190,20 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		switch (gameDifficulty) {
 		case VERY_EASY:
-			numberOfGhosts = 6;
+			numberOfGhosts = 8;
 			ghostBlindTime = 5000; 
 			ghostSpeed = 1;
 			mapDesgin = 1;
-			pacmanSpeed = 1;
+			pacmanSpeed = 2;
 			alwaysBlind = true;
 			break;
 		case EASY:
-			numberOfGhosts = 2;
+			numberOfGhosts = 3;
 			ghostBlindTime = 5000; 
 			ghostSpeed = 1;
 			mapDesgin = 1;
 			pacmanSpeed = 1;
+			alwaysBlind = false;
 			break;
 		case NORMAL:
 			numberOfGhosts = 4;
@@ -210,19 +211,21 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			ghostSpeed = 2;
 			mapDesgin = 1;
 			pacmanSpeed = 1;
+			alwaysBlind = false;
 			break;
 		case HARD:
-			numberOfGhosts = 4;
+			numberOfGhosts = 6;
 			ghostBlindTime = 400;
-			ghostSpeed = 4;
+			ghostSpeed = 3;
 			mapDesgin = 1;
 			pacmanSpeed = 1;
+			alwaysBlind = false;
 			break;
 		case CUSTOM:
 			numberOfGhosts = 10000;
 			ghostBlindTime = 5000;
-			ghostSpeed = 1; // 1 to 4 - 2 == normal
-			pacmanSpeed = 2;// 1 to 4 - 1 == normal
+			ghostSpeed = 2; // 1 to 4 - 2 == normal
+			pacmanSpeed = 1;// 1 to 4 - 1 == normal
 			mapDesgin = 2;
 			alwaysBlind = false;
 			break;

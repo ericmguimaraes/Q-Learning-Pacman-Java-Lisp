@@ -23,7 +23,7 @@ import java.awt.*;
 
 public class Pacman {
 	// frames to wait after eaten a dot
-	final int DOT_WAIT = 3;
+	int DOT_WAIT = 3;
 
 	int iDotWait;
 
@@ -68,6 +68,9 @@ public class Pacman {
 				imagePac[i][j] = applet.createImage(18, 18);
 				ImagePac.drawPac(imagePac[i][j], i, j);
 			}
+		if(speed>1){
+			DOT_WAIT = 0;
+		}
 	}
 
 	public void start() {
@@ -142,8 +145,13 @@ public class Pacman {
 			}
 		}
 		if (iDotWait == 0) {
-			iX += Tables.iXDirection[iDir]*speed;
-			iY += Tables.iYDirection[iDir]*speed;
+			if(speed>2){
+				iX += Tables.iXDirection[iDir]*speed;
+				iY += Tables.iYDirection[iDir]*speed;
+			}else{
+				iX += Tables.iXDirection[iDir];
+				iY += Tables.iYDirection[iDir];
+			}
 		} else
 			iDotWait--;
 		return (eaten);
