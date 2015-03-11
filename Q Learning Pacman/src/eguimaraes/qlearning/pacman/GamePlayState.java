@@ -222,8 +222,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			alwaysBlind = false;
 			break;
 		case CUSTOM:
-			numberOfGhosts = 10000;
-			ghostBlindTime = 5000;
+			numberOfGhosts = 10;
+			ghostBlindTime = 600;
 			ghostSpeed = 2; // 1 to 4 - 2 == normal
 			pacmanSpeed = 1;// 1 to 4 - 1 == normal
 			mapDesgin = 2;

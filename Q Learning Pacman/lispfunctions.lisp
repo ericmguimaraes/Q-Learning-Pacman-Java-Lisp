@@ -51,10 +51,10 @@
 
 ;;Qlearning
 
-(defparameter epsilon 0.05) ;; learning rate
-(defparameter gamma 0.8);; exploration rate
-(defparameter alpha 0.2);; discount factor
-(defparameter weights '())
+(defparameter epsilon 0.05) ;; exploration rate
+(defparameter gamma 0.8);; discount factor
+(defparameter alpha 0.2);; learning rate
+(defparameter weights '(1 1 1 1 1 1 1 1))
 
 
 ;;Compute the action to take in the current state.  With
@@ -69,13 +69,18 @@
 )
 
 ;;update your weights based on transition
-(defun update()
-  
+(defun update(state, action, next-state, reward)
+  (setf features (get-features state action))
+  (setf actions (get-legal-actions(next-state)))
+  (setf maxQ (get-qmax (next-state actions)))
+  ;;for each feature and weight
+  ;;difference = (reward + gamma  *maxQ) - self.getQValue(state, action)
+  ;;weights[feature] = weights[feature] + self.alpha * difference * features[feature]
 )
 
 ;;return Q(state,action) = w * featureVector
-(defun get-qvalue(state, action)
-  (apply '+ (mapcar #'* weights (get-features(state, action))))
+(defun get-qvalue(state action)
+  (apply '+ (mapcar #'* weights (get-features(state action))))
 )
 
 (defun flip-coin (e)
@@ -87,7 +92,7 @@
 )
 
 (defun compute-action-from-qvalues (state)
-  (setf actions (get-list-of-actions(state)))
+  (setf actions (legal-actions(state)))
   (setf best-action '())
   ;;choose best action based in the getQValue(state, action)
   ;;TODO
