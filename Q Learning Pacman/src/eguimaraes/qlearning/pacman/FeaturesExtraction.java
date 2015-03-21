@@ -21,9 +21,6 @@ public class FeaturesExtraction {
 	}
 	
 	public int[] getNewPosition(int x, int y, int action){
-		//I had to invert the order of x and y because the first developer used this pattern
-		//which is completely out of the worldly math pattern to coordenates
-		//and I just saw it after write everything with the normal pattern 
 	
 	int[] result = new int[2]; 
 		switch(action){
@@ -119,7 +116,7 @@ public class FeaturesExtraction {
 	}
 
 	public int getClosestGhostToEatDistance(int x, int y) {
-		int distance = Maze.HEIGHT*Maze.WIDTH;
+		int distance = -1;//Maze.HEIGHT*Maze.WIDTH;
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if(game.ghosts[i].iStatus==Ghost.BLIND)
 				if(getManhatanDistance(x, y, toHouseSize(game.ghosts[i].iX), toHouseSize(game.ghosts[i].iY))<distance)
@@ -128,7 +125,7 @@ public class FeaturesExtraction {
 		return distance;
 	}
 	
-	private int toHouseSize(int x){
+	public int toHouseSize(int x){
 		return (int) x/ GamePlayState.houseSize;
 	}
 

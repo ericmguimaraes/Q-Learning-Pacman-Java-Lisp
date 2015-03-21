@@ -38,4 +38,21 @@ public class LispConnection {
 		return (Function) getLispPackage().findAccessibleSymbol(name.toUpperCase()).getSymbolFunction();
 	}
 
+	public String arrayToString(int[] a){
+		String str="";
+		for (int i = 0; i < a.length; i++) {
+			str = str+Integer.toString(a[i])+" ";
+		}
+		str = str.trim();
+		return str;
+	}
+	
+	public int[] stringToArray(String str){
+		String[] astr = str.split(",");
+		int[] r = new int[astr.length];
+		for (int i : r) {
+			r[i]=Integer.parseInt(astr[i]);
+		}
+		return r;
+	}
 }

@@ -162,4 +162,18 @@ public class Pacman {
 			return (true);
 		return (false);
 	}
+	
+	public String getValidActions(){
+		String str = ""; 
+		int count = 0;
+		for (int i=0; i<4; i++){
+			if(mazeOK(iX / 16 + Tables.iXDirection[i], iY / 16
+						+ Tables.iYDirection[i])){
+				str = str+i+" ";
+			}
+		}
+		str = str.subSequence(0, str.length()-1).toString();
+		//System.out.println("|"+str+"|");
+		return str;
+	}
 }

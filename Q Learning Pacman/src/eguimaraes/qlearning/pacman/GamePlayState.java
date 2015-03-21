@@ -139,9 +139,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public FeaturesExtraction featuresExtractor;
 	boolean rightSpotIn = false, rightSpotIn2 = false;
 	public ArrayList<Reward> rewards;
-	public ArrayList<Features> features;
+	public Features lastState;
 	public int lastAction;
 	private int countRewards = 0;
+	private boolean firstAction = true;
 
 	// LISP PARAM
 	LispFunction lisp;
@@ -222,12 +223,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			alwaysBlind = false;
 			break;
 		case CUSTOM:
-			numberOfGhosts = 10;
-			ghostBlindTime = 600;
-			ghostSpeed = 2; // 1 to 4 - 2 == normal
-			pacmanSpeed = 1;// 1 to 4 - 1 == normal
-			mapDesgin = 2;
-			alwaysBlind = false;
+			numberOfGhosts = 50; // 0 to 10.000
+			ghostBlindTime = 3000; //600 == normal
+			ghostSpeed = 3; // 1 to 4 - 2 == normal
+			pacmanSpeed = 2;// 1 to 4 - 1 == normal
+			mapDesgin = 2; // 1 or 2
+			alwaysBlind = true; // ghosts alwaysBlind?
 			break;
 		}
 	}
@@ -243,10 +244,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lisp = LispFunction.getInstance(this);
 		featuresExtractor = FeaturesExtraction.getInstance(this);
 		rewards = new ArrayList<Reward>();
-		features = new ArrayList<Features>();
 		lastAction = 1;
+		lastState = new PacmanFeatures();
 
-		configGame(GameMode.HUMAN, GameDifficulty.CUSTOM);
+		configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 
 		// lisp.calltest();
 
@@ -497,7 +498,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			if (!rightSpotIn) { // all code inside of this if is called only one
 								// time in each turn
 
-				System.out.println(getLastRewardsValue());
+				//System.out.println(getLastRewardsValue());
 				
 				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
 					System.err.println("WALK");
@@ -511,7 +512,23 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					}
 					//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, n));
 					lastAction = n;
-				} 
+				} else {
+					if (gameMode == GameMode.QLEARNING){
+						Features stateResult = featuresExtractor.getFeatures(pac.iX, pac.iY);
+						
+						if(!firstAction) lisp.update(lastState ,lastAction, stateResult, getLastRewardsValue());
+						
+						int n = lisp.requestQLearningMove();
+						while (!isPossibleWalk(pac.iX, pac.iY, n)) {
+							n = lisp.requestQLearningMove();
+						}
+						
+						firstAction = false; 
+						lastAction = n;
+						lastState = stateResult;
+					
+					}
+				}
 
 				rightSpotIn = true;
 			}
@@ -782,8 +799,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	}
 
 	public boolean isPossibleWalk(int x, int y, int a) {
-		int[] newPosition = featuresExtractor.getNewPosition(x / 16, y / 16, a);
-		if (newPosition[0] == x / 16 && newPosition[1] == y / 16) {
+		x = featuresExtractor.toHouseSize(x);
+		y = featuresExtractor.toHouseSize(y);
+		int[] newPosition = featuresExtractor.getNewPosition(x, y , a);
+		if (newPosition[0] == x && newPosition[1] == y) {
 			return false;
 		}
 		return true;

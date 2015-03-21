@@ -25,35 +25,44 @@ public class LispFunction {
 	}
 
 	public int requestRandomMove(Pacman pac) {
-		LispObject result = connection.getFunction("RAN").execute(
-				new JavaObject(pac.realDir));
+		LispObject result = connection.getFunction("get-random-action").execute();
 		int n = result.intValue();
 		return n;
 	}
 	
-	public String arrayToString(int[] a){
-		String str="";
-		for (int i = 0; i < a.length; i++) {
-			str = str+Integer.toString(a[i])+" ";
-		}
-		str = str.trim();
-		return str;
-	}
-	
-	public int[] stringToArray(String str){
-		String[] astr = str.split(",");
-		int[] r = new int[astr.length];
-		for (int i : r) {
-			r[i]=Integer.parseInt(astr[i]);
-		}
-		return r;
-	}
-
 	public void test(String str) {
-		System.out.println(stringToArray(str).toString());
+		System.out.println(connection.stringToArray(str).toString());
 	}
 	 
 	public void calltest() {
 		connection.getFunction("test").execute();
 	}
+	
+	public int requestQLearningMove() {
+		LispObject result = connection.getFunction("get-action").execute();
+		int n = result.intValue();
+		return n;
+	}
+	
+	public void update(Features lastState, int lastAction, Features stateResult, int reward) {
+		connection.getFunction("update").execute(new JavaObject(lastState.toString()), new JavaObject(lastAction),
+				new JavaObject(stateResult.toString()), new JavaObject(reward));
+	}
+	
+	public String getFeatures(int action){
+		return state.featuresExtractor.getFeatures(state.pac.iX, state.pac.iY, action).toString();
+	}
+	
+	public String getFeatures(){
+		return state.featuresExtractor.getFeatures(state.pac.iX, state.pac.iY).toString();
+	}
+	
+	public int getLastDir(){
+		return state.pac.realDir;
+	}
+	
+	public String getActions(){
+		return state.pac.getValidActions();
+	}
+	
 }
