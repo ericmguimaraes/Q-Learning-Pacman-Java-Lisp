@@ -2,19 +2,16 @@
 
 ;; JAVA-CONNECTION Functions
 (defun init(param)
-  ;;(print "init")
   (setf javaobj param)
 )
 
 (defun call-java (javamethod)
-  ;;(print "call-java")
   (let* ((class (jclass "eguimaraes.qlearning.pacman.LispFunction"))
 	 (method (jmethod class javamethod))
 	 (result (jcall method javaobj)))
     result))
 
 (defun call-java-param-str (javamethod str)
-  ;;(print "call-java-param")
   (let* ((class (jclass "eguimaraes.qlearning.pacman.LispFunction"))
 	 (strclass (jclass "java.lang.String"))
 	 (method (jmethod class javamethod strclass))
@@ -22,7 +19,6 @@
     result))
 
 (defun call-java-param-int (javamethod str)
-  ;;(print "call-java-param-int")
   (let* ((class (jclass "eguimaraes.qlearning.pacman.LispFunction"))
 	 (intclass (jclass "int"))
 	 (method (jmethod class javamethod intclass))
@@ -30,18 +26,14 @@
     result))
 
 (defun string-to-list (string)
-  ;;(print "string-to-list")
   (mapcar #'parse-integer (split-by-one-space string))
 )
 
 (defun list-to-string (lst)
-  ;;(print "list-to-string")  
   (format nil "~{~A~^,~}" lst)
 )
 
 (defun split-by-one-space (string)
-  ;;(print "split-by-one-space")
-  ;;(print string)  
   (loop for i = 0 then (1+ j)
           as j = (position #\Space string :start i)
           collect (subseq string i j)
@@ -50,7 +42,6 @@
 ;; Other functions
 
 (defun get-random-action (last-dir)
-    ;;(print (jarray-ref-raw (jobject-lisp-value dir) 0))
 	(print "get-random-action")
   (defparameter n (random 4))
 	(cond
@@ -72,10 +63,11 @@
 
 ;;Qlearning
 
-(defparameter epsilon 0.05) ;; exploration rate
-(defparameter gamma 0.5);; discount factor
-(defparameter alpha 0.2);; learning rate
-(defparameter weights '(1 1 1 1 1 1))
+(defparameter epsilon 0) ;; exploration rate
+(defparameter gamma 0.1);; discount factor
+(defparameter alpha 0.1);; learning rate
+(defparameter weights '(1 1 1 1 1 1 1))
+(defparameter count 0)
 
 
 ;;Compute the action to take in the current state.  With
@@ -83,8 +75,8 @@
 ;;take the best policy action otherwise.  Note that if there are
 ;;no legal actions the return is nil
 (defun get-action()
- ;; (print "get-action")
-  ;;(print "Weights: ")
+  ;;(setf count (+ count 1))
+  ;;(setf epsilon (/ 1 (/ count 2)))
   (if (flip-coin epsilon) 
     (get-random-action (get-last-dir))
     (compute-action-from-qvalues)
@@ -93,17 +85,19 @@
 
 ;;choose best action based in the getQValue(state, action)
 (defun compute-action-from-qvalues ()
-  (print "compute-action-from-qvalues")
   (setf actions (get-legal-actions))
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
-  ;;(print q)
   (loop for action in actions do (if (>= (get-q-value-from-action action) q) (progn 
                                           (setf best-action action) 
                                           (setf q (get-q-value-from-action action))
                                          )))
-  ;;(print "Action Computed")
-  best-action
+  (setf best-actions (cons best-action '()))
+  (loop for action in actions do (if (and (equal (get-q-value-from-action action) q) (not (equal action best-action))) 
+                                    (setf best-actions (cons action best-actions))))
+  (if (equal 1 (length best-actions)) 
+    (nth 0 best-actions) 
+    (nth (random (length best-actions)) best-actions))
 )
 
 ;;update your weights based on transition
@@ -111,51 +105,35 @@
 ;;difference = (reward + gamma  *maxQ) - self.getQValue(state, action)
 ;;weights[feature] = weights[feature] + self.alpha * difference * features[feature]
 (defun update(state action next-state reward)
-  (setf state (string-to-list (jobject-lisp-value state)))
+  (setf n 100000)
+  (setf state (mapcar #'(lambda (x) (/ x n)) (string-to-list (jobject-lisp-value state))))
   (setf action (jobject-lisp-value action))
-  (setf next-state (string-to-list (jobject-lisp-value next-state)))
+  (setf next-state (mapcar #'(lambda (x) (/ x n)) (string-to-list (jobject-lisp-value next-state))))
   (setf reward (jobject-lisp-value reward))
-  (print "update")
-  ;;(print state)
-  ;;(print reward)
-  ;;(print next-state)
+  (setf feat '(dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
+  (print (mapcar #'cons feat state))
+  (print reward)
+  ;;(print (mapcar #'cons feat next-state))
   (setf max-q (get-qmax))
-  (print max-q)
   (setf difference (- (+ reward (* gamma max-q)) (get-q-value-from-features state)))
-  (print difference)
   (setf weights (mapcar #'(lambda (w f) (+ w (* alpha difference f))) weights state))
-  #|
-  (loop for i from 0 to (length weights) do(progn(
-       (setf wi (nth i weights))
-       (setf fi (nth i state))
-       (setf wei (+ wi (* alpha difference fi)))
-       (print wi) (print fi) (print wei)                                           
-       (setf new-weights (cons wei))
-   )))
-   (setf weights new-weights) |#
-  (print weights)
-  ;;(print "weights updated")
+  (print (mapcar #'cons feat weights))
 )
 
 ;;return Q(state,action) = w * featureVector
 (defun get-q-value-from-action(action)
- ;; (print "get-q-value-from-action")
   (apply '+ (mapcar #'* weights (get-features-act action)))
 )
 
 (defun get-q-value-from-features(state)
- ;; (print "get-q-value-from-features")
   (apply '+ (mapcar #'* weights state))
 )
 
 (defun get-qmax ()
-;;  (print "get-qmax")
   (setf actions (get-legal-actions))'
- ;; (print actions)
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
   (loop for action in actions do (if (> (get-q-value-from-action action) q) (progn 
-                                        ;;  (print "entrou no if")                                     
                                           (setf best-action action) 
                                           (setf q (get-q-value-from-action action))
                                          )))
@@ -163,28 +141,22 @@
 )
 
 (defun flip-coin (e)
- ;; (print "flip-coin")
   (< (random 100) (* e 100)) 
 )
 
 (defun get-features ()
- ;; (print "get-features")
-  (string-to-list(call-java "getFeatures"))
+  (mapcar #'(lambda (x) (/ x 100000)) (string-to-list (call-java "getFeatures")))
 )
 
 (defun get-features-act (action)
- ;; (print "get-features-act")
-  (string-to-list (call-java-param-int "getFeatures" action))
+(setf n 100000)
+  (mapcar #'(lambda (x) (/ x 100000)) (string-to-list (call-java-param-int "getFeatures" action)))
 )
 
 (defun get-legal-actions ()
-  ;;(print "get-legal-actions")
   (string-to-list (call-java "getActions"))
 )
 
 (defun get-last-dir ()
- ;; (print "get-last-dir")
   (jobject-lisp-value (call-java "getLastDir"))
 )
-
-

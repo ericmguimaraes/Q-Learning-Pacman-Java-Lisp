@@ -40,13 +40,12 @@ public class LispFunction {
 	
 	public int requestQLearningMove() {
 		LispObject result = connection.getFunction("get-action").execute();
-		int n = result.intValue();
-		return n;
+		return result.intValue();
 	}
 	
 	public void update(Features lastState, int lastAction, Features stateResult, int reward) {
-		connection.getFunction("update").execute(new JavaObject(lastState.toString()), new JavaObject(lastAction),
-				new JavaObject(stateResult.toString()), new JavaObject(reward));
+		connection.getFunction("update").execute(new JavaObject(lastState.toString1000()), new JavaObject(lastAction),
+				new JavaObject(stateResult.toString1000()), new JavaObject(reward));
 	}
 	
 	public String getFeatures(int action){

@@ -13,13 +13,13 @@ public class Reward {
 	public Reward(RewardType type) {
 		rewardType = type;
 		switch(type){
-			case DOT: value = 20;
+			case DOT: value = 2;
 			break;
-			case POWER_DOT: value = 40;
+			case POWER_DOT: value = 4;
 			break;
 			case EAT_GHOST: value = 200;
 			break;
-			case DIE: value = -400;
+			case DIE: value = -600;
 			break;
 			case WALK: value = -1;
 			break;

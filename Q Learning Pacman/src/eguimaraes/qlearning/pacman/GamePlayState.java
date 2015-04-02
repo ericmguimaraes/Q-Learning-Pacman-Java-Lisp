@@ -185,7 +185,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			break;
 		case QLEARNINGTRAINED:
 			pinte = false;
-			jogosSemPintar = 200;
+			jogosSemPintar = 50;
 			break;
 		}
 
@@ -487,8 +487,6 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		int k;
 		int oldScore = score;
 
-		
-		
 		for (int i = 0; i < ghosts.length; i++)
 			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
@@ -497,7 +495,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
 			if (!rightSpotIn) { // all code inside of this if is called only one
 								// time in each turn
-
+				if(gameMode==GameMode.HUMAN){
+					
+					if(!firstAction) lisp.update(lastState, lastAction, featuresExtractor.getFeatures(pac.iX, pac.iY), getLastRewardsValue());
+					firstAction = false;
+				}
 				//System.out.println(getLastRewardsValue());
 				
 				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
@@ -513,18 +515,21 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, n));
 					lastAction = n;
 				} else {
-					if (gameMode == GameMode.QLEARNING){
+					if (gameMode == GameMode.QLEARNING || gameMode == GameMode.QLEARNINGTRAINED){
 						Features stateResult = featuresExtractor.getFeatures(pac.iX, pac.iY);
+						//System.out.println(stateResult.toString());
 						
-						if(!firstAction) lisp.update(lastState ,lastAction, stateResult, getLastRewardsValue());
+						int r = getLastRewardsValue();
+						if(r<0) ((PacmanFeatures) lastState).setEatDot(0);
+						if(!firstAction) lisp.update(lastState ,lastAction, stateResult, r);
 						
-						int n = lisp.requestQLearningMove();
-						while (!isPossibleWalk(pac.iX, pac.iY, n)) {
-							n = lisp.requestQLearningMove();
+						lastAction = lisp.requestQLearningMove();
+						while (!isPossibleWalk(pac.iX, pac.iY, lastAction)) {
+							lastAction = lisp.requestQLearningMove();
 						}
 						
 						firstAction = false; 
-						lastAction = n;
+						
 						lastState = stateResult;
 					
 					}
@@ -542,7 +547,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		}
 
 		k = pac.move(lastAction);
-
+		
 		if (k == 1) // eaten a dot
 		{
 			changeScore = 1;
