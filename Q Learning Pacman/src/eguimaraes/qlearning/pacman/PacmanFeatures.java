@@ -88,7 +88,7 @@ public class PacmanFeatures extends Features {
 		eatDot*n+" "+
 		eatPowerDot*n+" "+
 		eatGhost*n+" "+
-		(int) closestGhostToEatDistance*n+" "+
+		(int) (closestGhostToEatDistance*n)+" "+
 		beEaten*n;
 		//(int) (1/(closestGhostToEatDistance^2))*100;
 	}

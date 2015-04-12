@@ -65,7 +65,7 @@ public class FeaturesExtraction {
 	}
 
 	public float getClosestFoodDistance(int x, int y) {
-		int distance = Maze.HEIGHT * Maze.WIDTH;
+		int distance = Maze.HEIGHT + Maze.WIDTH;
 		for (int h = 0; h < Maze.HEIGHT; h++) {
 			for (int w = 0; w < Maze.WIDTH; w++) {
 				if (getManhatanDistance(x, y, w, h) < distance
@@ -73,8 +73,8 @@ public class FeaturesExtraction {
 					distance = getManhatanDistance(x, y, w, h);
 			}
 		}
-		float n = ((float) distance / 5);
-		// System.out.println("Distance orig: "+n);
+		float n = ((float) distance / 30);
+		//System.out.println("Distance: "+n);
 		return n;
 	}
 
@@ -111,7 +111,7 @@ public class FeaturesExtraction {
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if (game.ghosts[i].iStatus == Ghost.BLIND)
 				continue;
-			if (isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY, 16))
+			if (isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY, 20))
 				countGhost++;
 		}
 		return countGhost;
@@ -133,19 +133,18 @@ public class FeaturesExtraction {
 	}
 
 	public float getClosestGhostToEatDistance(int x, int y) {
-		int distance = Maze.HEIGHT * Maze.WIDTH, count = 0;
+		int distance = Maze.HEIGHT*16 + Maze.WIDTH*16, count = 0;
 
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if (game.ghosts[i].iStatus == Ghost.BLIND) {
-				if (getManhatanDistance(x, y, toHouseSize(game.ghosts[i].iX),
-						toHouseSize(game.ghosts[i].iY)) < distance)
-					distance = getManhatanDistance(x, y,
-							toHouseSize(game.ghosts[i].iX),
-							((int) game.ghosts[i].iY / GamePlayState.houseSize));
+				int newdist = getManhatanDistance(x, y, game.ghosts[i].iX, game.ghosts[i].iY);
+				if (newdist < distance)
+					distance = newdist;
 				count++;
 			}
 		}
-		float n = ((float) distance / 20);
+		//if(count != 0)System.out.println(distance);
+		float n = ((float) distance /  (Maze.HEIGHT*16 + Maze.WIDTH*16));
 		return count != 0 ? n : 0;
 	}
 
@@ -185,6 +184,10 @@ public class FeaturesExtraction {
 		int newx = toHouseSize(x), newy = toHouseSize(y);
 		return getFeaturesAUX(x, y, newx, newy);
 	}
+	
+	public PacmanFeatures getFeaturesFromHouseSize(int x, int y) {
+		return getFeaturesAUX(x*16, y*16, x, y);
+	}
 
 	private PacmanFeatures getFeaturesAUX(int x, int y, int newx, int newy) {
 		PacmanFeatures result = new PacmanFeatures();
@@ -192,7 +195,7 @@ public class FeaturesExtraction {
 		result.setClosestFoodDistance(follower ? 0 : getClosestFoodDistance(
 				newx, newy));
 		result.setClosestGhostToEatDistance(follower ? 0
-				: getClosestGhostToEatDistance(newx, newy));
+				: getClosestGhostToEatDistance(x, y));
 		result.setEatDot(follower ? 0 : getEatDot(newx, newy));
 		result.setEatGhost(getEatGhost(x, y));
 		result.setEatPowerDot(follower ? 0 : getEatPowerDot(newx, newy));

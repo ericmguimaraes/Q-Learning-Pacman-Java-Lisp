@@ -137,8 +137,6 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	// LISP PARAM
 	LispFunction lisp;
-	private boolean shoudIMove = true;
-	public static boolean movimentControled = false;
 
 	// GAME DESIGN CONTROL
 	public static enum GameMode {
@@ -157,6 +155,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static int ghostSpeed; // 1 to 4 - 2 == normal
 	public static int numberOfGhosts; // anything
 	public static boolean alwaysBlind = false; // ghosts alwaysBlind?
+	public static int level = 0;
+	public static boolean levelBased = true;
+	private boolean shoudIMove = true;
+	public static boolean movimentControled = false;
 
 	private void configGame(GameMode gm, GameDifficulty gd) {
 		gameMode = gm;
@@ -239,7 +241,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lastAction = 1;
 		lastState = new PacmanFeatures();
 
-		configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
+		if(levelBased){
+			configGame(GameMode.QLEARNING, GameDifficulty.EASY);
+		}else{
+			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
+		}
+		
 
 		// lisp.calltest();
 
@@ -299,20 +306,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		// initialize ghosts object
 		// 4 ghosts
-		ghosts = new Ghost[numberOfGhosts];
-		for (int i = 0; i < ghosts.length; i++) {
-			Color color;
-			if (i % 4 == 0)
-				color = Color.red;
-			else if (i % 4 == 1)
-				color = Color.blue;
-			else if (i % 4 == 2)
-				color = Color.white;
-			else
-				color = Color.orange;
-			ghosts[i] = new Ghost(this, offScreenG, maze, color,
-					ghostBlindTime, ghostSpeed, alwaysBlind);
-		}
+		ghostsInit();
 
 		// initialize power dot object
 		powerDot = new PowerDot(this, offScreenG, ghosts);
@@ -340,6 +334,23 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		imgScoreG.drawString("SCORE", 0, 14);
 	}
 
+	private void ghostsInit() {
+		ghosts = new Ghost[numberOfGhosts];
+		for (int i = 0; i < ghosts.length; i++) {
+			Color color;
+			if (i % 4 == 0)
+				color = Color.red;
+			else if (i % 4 == 1)
+				color = Color.blue;
+			else if (i % 4 == 2)
+				color = Color.white;
+			else
+				color = Color.orange;
+			ghosts[i] = new Ghost(this, offScreenG, maze, color,
+					ghostBlindTime, ghostSpeed, alwaysBlind);
+		}
+	}
+
 	void startTimer() {
 		// start the timer
 		timer = new Thread(this);
@@ -361,6 +372,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	}
 
 	void startRound() {
+		
 		// new round for maze?
 		if (newMaze == true) {
 			maze.start();
@@ -579,6 +591,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				wait = WAITCOUNT;
 				newMaze = true;
 				round++;
+				level++;
+				gameDifficulty = getGameDifficulty(level);
+				configGame(gameMode, gameDifficulty);
+				initImages();
 				return;
 			}
 
@@ -846,4 +862,16 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		return sum;
 	}
 
+	private GameDifficulty getGameDifficulty(int level){
+		switch (level) {
+		case 0:
+			return GameDifficulty.EASY;
+		case 1:
+			return GameDifficulty.NORMAL;
+		case 2:
+			return GameDifficulty.HARD;
+		default:
+			return GameDifficulty.HARD;
+		}
+	}
 }
