@@ -61,7 +61,6 @@ public class FeaturesExtraction {
 			result[0] = x;
 			break;
 		}
-
 		return result;
 	}
 
@@ -74,52 +73,12 @@ public class FeaturesExtraction {
 					distance = getManhatanDistance(x, y, w, h);
 			}
 		}
-		float n = ((float) distance / 30);
+		float n = ((float) distance / 5);
 		// System.out.println("Distance orig: "+n);
 		return n;
 	}
 
-	public int getNumGhost1stepAway(int x, int y) {
-		int countGhost = 0;
-		for (int i = 0; i < game.ghosts.length; i++) {
-			if (game.ghosts[i].iStatus == Ghost.BLIND)
-				continue;
-			int xg = toHouseSize(game.ghosts[i].iX), yg = toHouseSize(game.ghosts[i].iY);
-			if ((xg == x && yg == y) || (xg == x + 1 && yg == y)
-					|| (xg == x + 1 && yg == y + 1)
-					|| (xg == x + 1 && yg == y - 1) || (xg == x - 1 && yg == y)
-					|| (xg == x - 1 && yg == y + 1)
-					|| (xg == x - 1 && yg == y - 1) || (yg == y + 1 && xg == x)
-					|| (yg == y + 1 && xg == x + 1)
-					|| (yg == y + 1 && xg == x - 1) || (yg == y - 1 && xg == x)
-					|| (yg == y - 1 && xg == x + 1)
-					|| (yg == y - 1 && xg == x - 1))
-				countGhost = countGhost + 1;
-			// if ((xg == x + 2 && yg == y)
-			// || (xg == x && yg == y - 2)
-			// || (xg == x - 2 && yg == y)
-			// || (xg == x && yg == y + 2)
-			// || (xg == x + 2 && yg == y - 1)
-			// || (xg == x + 2 && yg == y - 2)
-			// || (xg == x + 2 && yg == y + 1)
-			// || (xg == x + 2 && yg == y + 2)
-			// || (xg == x - 2 && yg == y - 1)
-			// || (xg == x - 2 && yg == y - 2)
-			// || (xg == x - 2 && yg == y + 1)
-			// || (xg == x - 2 && yg == y + 2)
-			// || (yg == y + 2 && xg == x - 1)
-			// || (yg == y + 2 && xg == x - 2)
-			// || (yg == y + 2 && xg == x + 1)
-			// || (yg == y + 2 && xg == x + 2)
-			// || (yg == y - 2 && xg == x - 1)
-			// || (yg == y - 2 && xg == x - 2)
-			// || (yg == y - 2 && xg == x + 1)
-			// || (yg == y - 2 && xg == x + 2))
-			// countGhost = countGhost + 1;
-		}
-
-		return countGhost;
-	}
+	
 
 	public int getEatDot(int x, int y) {
 		if (game.maze.iMaze[y][x] == Maze.DOT) {
@@ -137,40 +96,57 @@ public class FeaturesExtraction {
 		}
 	}
 
-	public int getEatGhost(int x, int y) {
+	public int isSomeGhostHere(int x, int y, int ghostStatus) {
 		for (int i = 0; i < game.ghosts.length; i++) {
-			if (game.ghosts[i].iStatus == Ghost.BLIND
-					&& (toHouseSize(game.ghosts[i].iX) == x && toHouseSize(game.ghosts[i].iY) == y))
+			if (game.ghosts[i].iStatus == ghostStatus
+					&& isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY,
+							8))
 				return 1;
 		}
 		return 0;
 	}
-
-	public float getClosestGhostToEatDistance(int x, int y) {
-		int distance = 0;// Maze.HEIGHT*Maze.WIDTH;
+	
+	public int getNumGhost1stepAway(int x, int y) {
+		int countGhost = 0;
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if (game.ghosts[i].iStatus == Ghost.BLIND)
+				continue;
+			if (isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY, 16))
+				countGhost++;
+		}
+		return countGhost;
+	}
+
+	public boolean isCollision(int iPacX, int iPacY, int xG, int yG, int pixels) {
+		if (xG <= iPacX + pixels && xG >= iPacX - pixels
+				&& yG <= iPacY + pixels && yG >= iPacY - pixels)
+			return true;
+		return false;
+	}
+
+	public int getEatGhost(int x, int y) {
+		return isSomeGhostHere(x, y, Ghost.BLIND);
+	}
+
+	public int getBeEaten(int x, int y) {
+		return isSomeGhostHere(x, y, Ghost.OUT);
+	}
+
+	public float getClosestGhostToEatDistance(int x, int y) {
+		int distance = Maze.HEIGHT * Maze.WIDTH, count = 0;
+
+		for (int i = 0; i < game.ghosts.length; i++) {
+			if (game.ghosts[i].iStatus == Ghost.BLIND) {
 				if (getManhatanDistance(x, y, toHouseSize(game.ghosts[i].iX),
 						toHouseSize(game.ghosts[i].iY)) < distance)
 					distance = getManhatanDistance(x, y,
 							toHouseSize(game.ghosts[i].iX),
 							((int) game.ghosts[i].iY / GamePlayState.houseSize));
-		}
-		float n = ((float) distance / 30);
-		return n;
-	}
-
-	private int getBeEaten(int x, int y) {
-		for (int i = 0; i < game.ghosts.length; i++) {
-			if (game.ghosts[i].iStatus == Ghost.BLIND)
-				continue;
-			int pic = 16;
-			if ((x-pic < game.ghosts[i].iX) && (game.ghosts[i].iX < x+pic) &&
-					(y-pic < game.ghosts[i].iY) && (game.ghosts[i].iY < y+pic)) {
-				return 1;
+				count++;
 			}
 		}
-		return 0;
+		float n = ((float) distance / 20);
+		return count != 0 ? n : 0;
 	}
 
 	public int getisTurningBack(int newdir) {
@@ -196,20 +172,21 @@ public class FeaturesExtraction {
 	}
 
 	public PacmanFeatures getFeatures(int x, int y, int action) {
-		x = toHouseSize(x);
-		y = toHouseSize(y);
-		int newx = getNewPosition(x, y, action)[0], newy = getNewPosition(x, y,
-				action)[1];
-		return getFeaturesAUX(newx, newy);
+		int newx = toHouseSize(x);
+		int newy = toHouseSize(y);
+		newx = getNewPosition(newx, newy, action)[0];
+		newy = getNewPosition(newx, newy, action)[1];
+		x = newx * GamePlayState.houseSize + x % GamePlayState.houseSize;
+		y = newy * GamePlayState.houseSize + y % GamePlayState.houseSize;
+		return getFeaturesAUX(x, y, newx, newy);
 	}
 
 	public PacmanFeatures getFeatures(int x, int y) {
 		int newx = toHouseSize(x), newy = toHouseSize(y);
-		return getFeaturesAUX(newx, newy);
-		// TODO get coming back in direction feature
+		return getFeaturesAUX(x, y, newx, newy);
 	}
 
-	private PacmanFeatures getFeaturesAUX(int newx, int newy) {
+	private PacmanFeatures getFeaturesAUX(int x, int y, int newx, int newy) {
 		PacmanFeatures result = new PacmanFeatures();
 		boolean follower = getNumGhost1stepAway(newx, newy) > 0;
 		result.setClosestFoodDistance(follower ? 0 : getClosestFoodDistance(
@@ -217,10 +194,14 @@ public class FeaturesExtraction {
 		result.setClosestGhostToEatDistance(follower ? 0
 				: getClosestGhostToEatDistance(newx, newy));
 		result.setEatDot(follower ? 0 : getEatDot(newx, newy));
-		result.setEatGhost(follower ? 0 : getEatGhost(newx, newy));
+		result.setEatGhost(getEatGhost(x, y));
 		result.setEatPowerDot(follower ? 0 : getEatPowerDot(newx, newy));
-		result.setNumGhost1stepAway(getNumGhost1stepAway(newx, newy));
-		result.setBeEaten(getBeEaten(newx, newy));
+		result.setNumGhost1stepAway(getNumGhost1stepAway(x, y));
+		result.setBeEaten(getBeEaten(x, y));
+		// if(result.getBeEaten()!=0){
+		// System.out.println("VAI SER COMIDO CARAI");
+		// GamePlayState.movimentControled = true;
+		// }
 		return result;
 	}
 

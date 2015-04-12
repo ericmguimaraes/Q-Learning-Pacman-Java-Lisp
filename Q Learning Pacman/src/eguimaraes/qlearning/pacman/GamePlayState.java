@@ -36,15 +36,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 
-import org.armedbear.lisp.Function;
-import org.armedbear.lisp.Interpreter;
-import org.armedbear.lisp.JavaObject;
-import org.armedbear.lisp.LispObject;
-import org.armedbear.lisp.Packages;
-import org.armedbear.lisp.Symbol;
-
-import com.sun.org.apache.xalan.internal.utils.FeatureManager.Feature;
-
 import eguimaraes.qlearning.pacman.Reward.RewardType;
 
 /**
@@ -146,9 +137,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	// LISP PARAM
 	LispFunction lisp;
+	private boolean shoudIMove = true;
+	public static boolean movimentControled = false;
 
-	
-	//GAME DESIGN CONTROL
+	// GAME DESIGN CONTROL
 	public static enum GameMode {
 		HUMAN, RANDOM, QLEARNING, QLEARNINGTRAINED;
 	}
@@ -156,14 +148,14 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static enum GameDifficulty {
 		VERY_EASY, EASY, NORMAL, HARD, CUSTOM;
 	}
-	
+
 	public static GameMode gameMode;
 	public static GameDifficulty gameDifficulty;
 	public static int mapDesgin; // 1 or 2
 	public static int pacmanSpeed; // 1 to 4 - 1 == normal
-	public static int ghostBlindTime; //600 == normal
+	public static int ghostBlindTime; // 600 == normal
 	public static int ghostSpeed; // 1 to 4 - 2 == normal
-	public static int numberOfGhosts; //anything
+	public static int numberOfGhosts; // anything
 	public static boolean alwaysBlind = false; // ghosts alwaysBlind?
 
 	private void configGame(GameMode gm, GameDifficulty gd) {
@@ -185,14 +177,14 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			break;
 		case QLEARNINGTRAINED:
 			pinte = false;
-			jogosSemPintar = 50;
+			jogosSemPintar = 500;
 			break;
 		}
 
 		switch (gameDifficulty) {
 		case VERY_EASY:
 			numberOfGhosts = 8;
-			ghostBlindTime = 5000; 
+			ghostBlindTime = 5000;
 			ghostSpeed = 1;
 			mapDesgin = 1;
 			pacmanSpeed = 2;
@@ -200,7 +192,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			break;
 		case EASY:
 			numberOfGhosts = 3;
-			ghostBlindTime = 5000; 
+			ghostBlindTime = 5000;
 			ghostSpeed = 1;
 			mapDesgin = 1;
 			pacmanSpeed = 1;
@@ -224,7 +216,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			break;
 		case CUSTOM:
 			numberOfGhosts = 50; // 0 to 10.000
-			ghostBlindTime = 3000; //600 == normal
+			ghostBlindTime = 3000; // 600 == normal
 			ghostSpeed = 3; // 1 to 4 - 2 == normal
 			pacmanSpeed = 2;// 1 to 4 - 1 == normal
 			mapDesgin = 2; // 1 or 2
@@ -264,11 +256,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		about.addActionListener(this);
 
-		if(mapDesgin==2){
-			canvasWidth = canvasWidth*2;
-			canvasHeight = canvasHeight*2;
+		if (mapDesgin == 2) {
+			canvasWidth = canvasWidth * 2;
+			canvasHeight = canvasHeight * 2;
 		}
-		
+
 		setSize(canvasWidth, canvasHeight);
 		show();
 		// System.out.println("cpcman done");
@@ -292,13 +284,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	public void initImages() {
 		// initialize off screen drawing canvas
-		if(mapDesgin==2){
-			offScreen = createImage(Maze.iWidth*2, Maze.iHeight*2);
-		}else{
+		if (mapDesgin == 2) {
+			offScreen = createImage(Maze.iWidth * 2, Maze.iHeight * 2);
+		} else {
 			offScreen = createImage(Maze.iWidth, Maze.iHeight);
 		}
-		
-		
+
 		if (offScreen == null)
 			System.out.println("createImage failed");
 		offScreenG = offScreen.getGraphics();
@@ -311,15 +302,16 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		ghosts = new Ghost[numberOfGhosts];
 		for (int i = 0; i < ghosts.length; i++) {
 			Color color;
-			if (i%4 == 0)
+			if (i % 4 == 0)
 				color = Color.red;
-			else if (i%4 == 1)
+			else if (i % 4 == 1)
 				color = Color.blue;
-			else if (i%4 == 2)
+			else if (i % 4 == 2)
 				color = Color.white;
 			else
 				color = Color.orange;
-			ghosts[i] = new Ghost(this, offScreenG, maze, color, ghostBlindTime, ghostSpeed, alwaysBlind);
+			ghosts[i] = new Ghost(this, offScreenG, maze, color,
+					ghostBlindTime, ghostSpeed, alwaysBlind);
 		}
 
 		// initialize power dot object
@@ -381,7 +373,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		pac.start();
 		pacKeyDir = Tables.DOWN;
 		for (int i = 0; i < ghosts.length; i++)
-			ghosts[i].start(i%4, round);
+			ghosts[i].start(i % 4, round);
 
 		gameState = STARTWAIT;
 		wait = WAITCOUNT;
@@ -484,125 +476,147 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// this is the routine running at the background of drawings
 	// //////////////////////////////////////////////////////////
 	void move() {
-		int k;
-		int oldScore = score;
+		if (shoudIMove) {
+			int k;
+			int oldScore = score;
+			
+			if (movimentControled) shoudIMove = false;
 
-		for (int i = 0; i < ghosts.length; i++)
-			ghosts[i].move(pac.iX, pac.iY, pac.iDir);
+			for (int i = 0; i < ghosts.length; i++)
+				ghosts[i].move(pac.iX, pac.iY, pac.iDir);
 
-		// lastAction code
-		k = 0;
-		if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
-			if (!rightSpotIn) { // all code inside of this if is called only one
-								// time in each turn
-				if(gameMode==GameMode.HUMAN){
-					
-					if(!firstAction) lisp.update(lastState, lastAction, featuresExtractor.getFeatures(pac.iX, pac.iY), getLastRewardsValue());
-					firstAction = false;
-				}
-				//System.out.println(getLastRewardsValue());
-				
-				if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
-					System.err.println("WALK");
-					rewards.add(new Reward(RewardType.WALK));
-				}
+			// lastAction code
+			k = 0;
+			if (pac.iX % 16 == 0 && pac.iY % 16 == 0) {
+				if (!rightSpotIn) { // all code inside of this if is called only
+									// one
+									// time in each turn
+					if (gameMode == GameMode.HUMAN) {
 
-				if (gameMode == GameMode.RANDOM) {
-					int n = lisp.requestRandomMove(pac);
-					while (!isPossibleWalk(pac.iX, pac.iY, n)) {
-						n = lisp.requestRandomMove(pac);
+						if (!firstAction)
+							lisp.update(lastState, lastAction,
+									featuresExtractor.getFeatures(pac.iX,
+											pac.iY), getLastRewardsValue());
+						firstAction = false;
 					}
-					//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, n));
-					lastAction = n;
-				} else {
-					if (gameMode == GameMode.QLEARNING || gameMode == GameMode.QLEARNINGTRAINED){
-						Features stateResult = featuresExtractor.getFeatures(pac.iX, pac.iY);
-						//System.out.println(stateResult.toString());
-						
-						int r = getLastRewardsValue();
-						if(r<0) ((PacmanFeatures) lastState).setEatDot(0);
-						if(!firstAction) lisp.update(lastState ,lastAction, stateResult, r);
-						
-						lastAction = lisp.requestQLearningMove();
-						while (!isPossibleWalk(pac.iX, pac.iY, lastAction)) {
-							lastAction = lisp.requestQLearningMove();
+					// System.out.println(getLastRewardsValue());
+
+					if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
+						System.err.println("WALK");
+						rewards.add(new Reward(RewardType.WALK));
+					}
+
+					if (gameMode == GameMode.RANDOM) {
+						int n = lisp.requestRandomMove(pac);
+						while (!isPossibleWalk(pac.iX, pac.iY, n)) {
+							n = lisp.requestRandomMove(pac);
 						}
-						
-						firstAction = false; 
-						
-						lastState = stateResult;
-					
+						// System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY,
+						// n));
+						lastAction = n;
+					} else {
+						if (gameMode == GameMode.QLEARNING
+								|| gameMode == GameMode.QLEARNINGTRAINED) {
+							Features stateResult = featuresExtractor
+									.getFeatures(pac.iX, pac.iY);
+							// System.out.println(stateResult.toString());
+
+							int r = getLastRewardsValue();
+							if (r < 0)
+								((PacmanFeatures) lastState).setEatDot(0);
+							if(r>0){ 
+								((PacmanFeatures) lastState).setNumGhost1stepAway(0);
+							}
+							if (!firstAction)
+								lisp.update(lastState, lastAction, stateResult,
+										r);
+
+							lastAction = lisp.requestQLearningMove();
+							while (!isPossibleWalk(pac.iX, pac.iY, lastAction)) {
+								lastAction = lisp.requestQLearningMove();
+							}
+
+							firstAction = false;
+
+							lastState = stateResult;
+
+						}
 					}
+
+					rightSpotIn = true;
 				}
-
-				rightSpotIn = true;
+			} else {
+				rightSpotIn = false;
 			}
-		} else {
-			rightSpotIn = false;
-		}
-		
-		if (gameMode == GameMode.HUMAN) {
-			//System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY, pacKeyDir));
-			lastAction = pacKeyDir;
-		}
 
-		k = pac.move(lastAction);
-		
-		if (k == 1) // eaten a dot
-		{
-			changeScore = 1;
-			score += 10 * ((round + 1) / 2);
-			System.err.println("DOT");
-			rewards.add(new Reward(RewardType.DOT));
-		} else if (k == 2) // eaten a powerDot
-		{
-			System.err.println("POWER_DOT");
-			rewards.add(new Reward(RewardType.POWER_DOT));
-			scoreGhost = 200;
-		}
+			if (gameMode == GameMode.HUMAN) {
+				// System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY,
+				// pacKeyDir));
+				lastAction = pacKeyDir;
+			}
 
-		if (maze.iTotalDotcount == 0) {
-			gameState = DEADWAIT;
-			wait = WAITCOUNT;
-			newMaze = true;
-			round++;
-			return;
-		}
+			if(featuresExtractor.getBeEaten(pac.iX, pac.iY)==1 && (gameMode == GameMode.QLEARNING
+					|| gameMode == GameMode.QLEARNINGTRAINED)){
+				lastAction = lisp.requestQLearningMove();
+			}
+			k = pac.move(lastAction);
 
-		for (int i = 0; i < ghosts.length; i++) {
-			k = ghosts[i].testCollision(pac.iX, pac.iY);
-			if (k == 1) // kill pac
+			if (k == 1) // eaten a dot
 			{
-				System.err.println("DIE");
-				rewards.add(new Reward(RewardType.DIE));
-//				System.err.println(">>>>>>>TESTE<<<<<<<");
-//				for (int j = 0; j < rewards.size(); j++) {
-//					System.err.println(rewards.get(j).toString());
-//				}
-				pacRemain--;
-				changePacRemain = 1;
-				gameState = DEADWAIT; // stop the game
-				wait = WAITCOUNT;
-				return;
-			} else if (k == 2) // caught by pac
-			{
-				System.err.println("EAT_GHOST");
-				rewards.add(new Reward(RewardType.EAT_GHOST));
-				score += scoreGhost * ((round + 1) / 2);
 				changeScore = 1;
-				scoreGhost *= 2;
+				score += 10 * ((round + 1) / 2);
+				System.err.println("DOT");
+				rewards.add(new Reward(RewardType.DOT));
+			} else if (k == 2) // eaten a powerDot
+			{
+				System.err.println("POWER_DOT");
+				rewards.add(new Reward(RewardType.POWER_DOT));
+				scoreGhost = 200;
 			}
-		}
 
-		if (score > hiScore) {
-			hiScore = score;
-			changeHiScore = 1;
-		}
+			if (maze.iTotalDotcount == 0) {
+				gameState = DEADWAIT;
+				wait = WAITCOUNT;
+				newMaze = true;
+				round++;
+				return;
+			}
 
-		if (changeScore == 1) {
-			if (score / 10000 - oldScore / 10000 > 0) {
-				pacRemain++; // bonus
-				changePacRemain = 1;
+			for (int i = 0; i < ghosts.length; i++) {
+				k = ghosts[i].testCollision(pac.iX, pac.iY);
+				if (k == 1) // kill pac
+				{
+					System.err.println("DIE");
+					rewards.add(new Reward(RewardType.DIE));
+					// System.err.println(">>>>>>>TESTE<<<<<<<");
+					// for (int j = 0; j < rewards.size(); j++) {
+					// System.err.println(rewards.get(j).toString());
+					// }
+					pacRemain--;
+					changePacRemain = 1;
+					gameState = DEADWAIT; // stop the game
+					wait = WAITCOUNT;
+					return;
+				} else if (k == 2) // caught by pac
+				{
+					System.err.println("EAT_GHOST");
+					rewards.add(new Reward(RewardType.EAT_GHOST));
+					score += scoreGhost * ((round + 1) / 2);
+					changeScore = 1;
+					scoreGhost *= 2;
+				}
+			}
+
+			if (score > hiScore) {
+				hiScore = score;
+				changeHiScore = 1;
+			}
+
+			if (changeScore == 1) {
+				if (score / 10000 - oldScore / 10000 > 0) {
+					pacRemain++; // bonus
+					changePacRemain = 1;
+				}
 			}
 		}
 	}
@@ -695,6 +709,13 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		case KeyEvent.VK_B:
 			key = BOSS;
 			break;
+		case KeyEvent.VK_ENTER:
+			shoudIMove = true;
+			movimentControled = true;
+			break;
+		case KeyEvent.VK_ESCAPE:
+			movimentControled = false;
+			shoudIMove = true;
 		}
 	}
 
@@ -806,7 +827,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public boolean isPossibleWalk(int x, int y, int a) {
 		x = featuresExtractor.toHouseSize(x);
 		y = featuresExtractor.toHouseSize(y);
-		int[] newPosition = featuresExtractor.getNewPosition(x, y , a);
+		int[] newPosition = featuresExtractor.getNewPosition(x, y, a);
 		if (newPosition[0] == x && newPosition[1] == y) {
 			return false;
 		}

@@ -66,7 +66,7 @@
 (defparameter epsilon 0) ;; exploration rate
 (defparameter gamma 0.1);; discount factor
 (defparameter alpha 0.1);; learning rate
-(defparameter weights '(1 1 1 1 1 1 1))
+(defparameter weights '(0 0 0 0 0 0 0))
 (defparameter count 0)
 
 

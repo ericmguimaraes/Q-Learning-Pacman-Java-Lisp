@@ -17,7 +17,7 @@ public class Reward {
 			break;
 			case POWER_DOT: value = 4;
 			break;
-			case EAT_GHOST: value = 200;
+			case EAT_GHOST: value = 400;
 			break;
 			case DIE: value = -600;
 			break;
