@@ -34,6 +34,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import eguimaraes.qlearning.pacman.Reward.RewardType;
@@ -134,6 +135,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public int lastAction;
 	private int countRewards = 0;
 	private boolean firstAction = true;
+	private int triesCounter = 0;
+	private Statistics statistics = new Statistics();
 
 	// LISP PARAM
 	LispFunction lisp;
@@ -360,7 +363,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	void startGame() {
 		pacRemain = PAcLIVE;
 		changePacRemain = 1;
-
+		
 		score = 0;
 		changeScore = 1;
 
@@ -670,6 +673,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				// return;
 				break;
 			case RUNNING:
+			//	lisp.saveData("teste");
 				if (key == SUSPEND)
 					gameState = SUSPENDED;
 				else
@@ -678,8 +682,16 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			case DEADWAIT:
 				if (pacRemain > 0)
 					startRound();
-				else
+				else{ //final dead
+					triesCounter++;
+					statistics.setLevel(level);
+					statistics.setMode(gameMode);
+					statistics.setScore(score);
+					statistics.setTriesCounter(triesCounter);
+					lisp.saveData(statistics.toString());
 					startGame();
+				}
+					
 				gameState = STARTWAIT;
 				wait = WAITCOUNT;
 				pacKeyDir = Tables.DOWN;

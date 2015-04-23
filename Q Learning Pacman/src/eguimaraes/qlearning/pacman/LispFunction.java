@@ -64,4 +64,8 @@ public class LispFunction {
 		return state.pac.getValidActions();
 	}
 	
+	public void saveData(String str){
+		connection.getFunction("save-data").execute(new JavaObject(str));
+	}
+	
 }

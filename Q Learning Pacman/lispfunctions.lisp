@@ -75,9 +75,11 @@
 ;;take the best policy action otherwise.  Note that if there are
 ;;no legal actions the return is nil
 (defun get-action()
-  ;;(setf count (+ count 1))
-  ;;(setf epsilon (/ 1 (/ count 2)))
-  (if (flip-coin epsilon) 
+  (calc-save-stats)
+  ;;(make-instance 'statistic :mode mode :tries tries :level (nth 2 line) :score (nth 3 line) :count 1)
+  
+  
+ (if (flip-coin epsilon) 
     (get-random-action (get-last-dir))
     (compute-action-from-qvalues)
   )
@@ -159,4 +161,102 @@
 
 (defun get-last-dir ()
   (jobject-lisp-value (call-java "getLastDir"))
+)
+
+
+;;Statistics
+
+(defun write-in-file(string file)
+  (with-open-file (str file
+                     :direction :output
+                     :if-exists :append
+                     :if-does-not-exist :create)
+  (format str string)
+  (format str "~%"))
+)
+
+(defun save-data(string)
+  (write-in-file (jobject-lisp-value string) "./data.txt")
+)
+
+
+;;mode+" "+triesCounter+" "+level+" "+score;
+(defun calc-save-stats()
+  (defparameter stats '())
+  (with-open-file (stream "./data.txt"
+                     :direction :INPUT
+                     :if-does-not-exist nil)
+      (if stream (progn
+                   (setf line (get-line stream))
+                   (loop while (not (null line)) do (progn
+                     (setf mode (nth 0 line))
+                     (setf tries (nth 1 line))
+                     (setf n (find-mode-tries-match stats mode tries))
+                     (if n 
+                       (progn
+                         (defparameter s (nth n stats))
+                         (setf (slot-value s 'mode) mode)
+                         (setf (slot-value s 'tries) tries)
+                         (setf (slot-value s 'level) (+ (slot-value s 'level) (nth 2 line)))
+                         (setf (slot-value s 'score) (+ (slot-value s 'score) (nth 3 line)))
+                         (setf (slot-value s 'count) (+ count 1))
+                       ) 
+                       (cons stats (make-instance 'statistic :mode mode :tries tries :level (nth 2 line) :score (nth 3 line) :count 1))
+                       )
+                       (setf line (get-line stream))                                
+                      ))
+                   
+                   (print stats)
+        ;;computing averages
+        (loop for st in stats do (
+                 (setf (slot-value st 'level) (/ (slot-value st 'level) (slot-value st 'count)))
+                 (setf (slot-value st 'score) (/ (slot-value st 'score) (slot-value st 'count)))
+                 (write-in-file (stats-to-string st) "./statistics.txt")
+        ))
+        ))
+  )
+)
+
+(defun stats-to-string (st)
+  (cons (get-mode-string (slot-value s 'mode)) 
+    (cons (" Tries: ") (cons (slot-value s 'tries) 
+      (cons ("AVG Level: ") (cons (slot-value s 'level) 
+        (cons ("AVG Score: ") (slot-value s 'score)))))))    
+)
+
+(defun get-mode-string(mode)
+  (cond 
+    ((eq mode 0) "Human")
+    ((eq mode 1) "Random")
+    (t "QLearning")
+  )
+)
+  
+(defun get-line (stream)
+  (setf line (read-line stream nil))
+  (if line (string-to-list line) line)
+ )
+
+(defun find-mode-tries-match (stats mode tries)
+  (setf n nil)
+  (loop 
+    for i from 1 to (length stats)
+    for st in stats do (if (and (eq mode (slot-value st 'mode)) ((eq tries (slot-value st 'tries)))) 
+                         (setf n i) 
+                       ))
+  n
+)
+
+(defclass statistic ()
+  ((mode
+    :initarg :mode)
+   (tries
+    :initarg :tries)
+   (level
+    :initarg :level)
+   (score 
+     :initarg :score)
+    (count 
+     :initarg :count)
+   )
 )
