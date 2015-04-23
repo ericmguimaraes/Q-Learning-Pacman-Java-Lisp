@@ -41,6 +41,10 @@
 
 ;; Other functions
 
+(defun get-random-action-aux (last-dir)
+  (get-random-action (jobject-lisp-value last-dir))
+ )
+
 (defun get-random-action (last-dir)
 	(print "get-random-action")
   (defparameter n (random 4))
@@ -227,7 +231,7 @@
 
 (defun stats-to-string (st)
   (concatenate 'string "Mode: " (get-mode-string (slot-value st 'mode)) 
-    " Tries: " (write-to-string (slot-value st 'tries))
+    " Try: " (write-to-string (slot-value st 'tries))
     " AVG Level: " (write-to-string (slot-value st 'level)) 
     " AVG Score: " (write-to-string (slot-value st 'score)))
 )

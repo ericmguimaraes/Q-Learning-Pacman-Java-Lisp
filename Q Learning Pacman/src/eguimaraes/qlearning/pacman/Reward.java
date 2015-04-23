@@ -21,7 +21,7 @@ public class Reward {
 			break;
 			case DIE: value = -600;
 			break;
-			case WALK: value = -1;
+			case WALK: value = -5;
 			break;
 		}
 	}

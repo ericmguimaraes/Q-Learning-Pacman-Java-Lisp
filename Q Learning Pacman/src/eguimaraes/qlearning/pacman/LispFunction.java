@@ -25,7 +25,7 @@ public class LispFunction {
 	}
 
 	public int requestRandomMove(Pacman pac) {
-		LispObject result = connection.getFunction("get-random-action").execute();
+		LispObject result = connection.getFunction("get-random-action-aux").execute(new JavaObject(state.lastAction));
 		int n = result.intValue();
 		return n;
 	}
