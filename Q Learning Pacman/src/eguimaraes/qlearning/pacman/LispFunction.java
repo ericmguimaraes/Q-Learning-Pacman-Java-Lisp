@@ -68,4 +68,7 @@ public class LispFunction {
 		connection.getFunction("save-data").execute(new JavaObject(str));
 	}
 	
+	public void calcSaveStats(){
+		connection.getFunction("calc-save-stats").execute();
+	}
 }

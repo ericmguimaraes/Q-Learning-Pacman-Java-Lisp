@@ -182,7 +182,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			break;
 		case QLEARNINGTRAINED:
 			pinte = false;
-			jogosSemPintar = 500;
+			jogosSemPintar = 40;
 			break;
 		}
 
@@ -245,7 +245,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lastState = new PacmanFeatures();
 
 		if(levelBased){
-			configGame(GameMode.QLEARNING, GameDifficulty.EASY);
+			configGame(GameMode.QLEARNINGTRAINED, GameDifficulty.EASY);
 		}else{
 			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 		}
@@ -680,6 +680,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					move();
 				break;
 			case DEADWAIT:
+				lisp.calcSaveStats();
 				if (pacRemain > 0)
 					startRound();
 				else{ //final dead

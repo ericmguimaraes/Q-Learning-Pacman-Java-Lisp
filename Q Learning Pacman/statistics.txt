@@ -1,0 +1,14 @@
+Mode: QLearning Tries: 13 AVG Level: 1 AVG Score: 2505/2
+Mode: QLearning Tries: 12 AVG Level: 1 AVG Score: 2695/2
+Mode: QLearning Tries: 11 AVG Level: 1 AVG Score: 2385/2
+Mode: QLearning Tries: 10 AVG Level: 1 AVG Score: 1355
+Mode: QLearning Tries: 9 AVG Level: 1 AVG Score: 1115
+Mode: QLearning Tries: 8 AVG Level: 1 AVG Score: 1270
+Mode: QLearning Tries: 7 AVG Level: 1 AVG Score: 3715/2
+Mode: QLearning Tries: 6 AVG Level: 3/4 AVG Score: 3415/2
+Mode: QLearning Tries: 5 AVG Level: 3/4 AVG Score: 2915/2
+Mode: QLearning Tries: 4 AVG Level: 3/4 AVG Score: 4655/2
+Mode: QLearning Tries: 3 AVG Level: 1/4 AVG Score: 5115/2
+Mode: QLearning Tries: 2 AVG Level: 0 AVG Score: 1265
+Mode: QLearning Tries: 1 AVG Level: 0 AVG Score: 3095/2
+

@@ -75,7 +75,7 @@
 ;;take the best policy action otherwise.  Note that if there are
 ;;no legal actions the return is nil
 (defun get-action()
-  (calc-save-stats)
+  
   ;;(make-instance 'statistic :mode mode :tries tries :level (nth 2 line) :score (nth 3 line) :count 1)
   
   
@@ -166,23 +166,23 @@
 
 ;;Statistics
 
-(defun write-in-file(string file)
+(defun write-in-file(string file append)
   (with-open-file (str file
                      :direction :output
-                     :if-exists :append
+                     :if-exists (if append :append :supersede)
                      :if-does-not-exist :create)
   (format str string)
   (format str "~%"))
 )
 
 (defun save-data(string)
-  (write-in-file (jobject-lisp-value string) "./data.txt")
+  (write-in-file (jobject-lisp-value string) "./data.txt" t)
 )
 
 
 ;;mode+" "+triesCounter+" "+level+" "+score;
 (defun calc-save-stats()
-  (defparameter stats '())
+  (setf stats nil)
   (with-open-file (stream "./data.txt"
                      :direction :INPUT
                      :if-does-not-exist nil)
@@ -191,43 +191,51 @@
                    (loop while (not (null line)) do (progn
                      (setf mode (nth 0 line))
                      (setf tries (nth 1 line))
-                     (setf n (find-mode-tries-match stats mode tries))
-                     (if n 
+                     (if (null stats) 
+                       (setf n nil)
+                       (setf n (find-mode-tries-match stats mode tries)))
+                     
+                     (if n
                        (progn
-                         (defparameter s (nth n stats))
-                         (setf (slot-value s 'mode) mode)
-                         (setf (slot-value s 'tries) tries)
-                         (setf (slot-value s 'level) (+ (slot-value s 'level) (nth 2 line)))
-                         (setf (slot-value s 'score) (+ (slot-value s 'score) (nth 3 line)))
-                         (setf (slot-value s 'count) (+ count 1))
+                         (setf s (nth n stats))
+                         (setf (stats-mode s) mode)
+                         (setf (stats-tries s) tries)
+                         (setf (stats-level s) (+ (stats-level s) (nth 2 line)))
+                         (setf (stats-score s) (+ (stats-score s) (nth 3 line)))
+                         (setf (stats-count s) (+ (stats-count s) 1))
                        ) 
-                       (cons stats (make-instance 'statistic :mode mode :tries tries :level (nth 2 line) :score (nth 3 line) :count 1))
+                       (setf stats (cons (make-instance 'statistic :mode mode 
+                                        :tries tries :level (nth 2 line) 
+                                        :score (nth 3 line) :count 1) 
+                                     stats))
                        )
-                       (setf line (get-line stream))                                
+                       (setf line (get-line stream))                              
                       ))
                    
-                   (print stats)
+                  ;;(print stats)
         ;;computing averages
-        (loop for st in stats do (
-                 (setf (slot-value st 'level) (/ (slot-value st 'level) (slot-value st 'count)))
-                 (setf (slot-value st 'score) (/ (slot-value st 'score) (slot-value st 'count)))
-                 (write-in-file (stats-to-string st) "./statistics.txt")
+        (setf result "")
+        (loop for st in stats do (progn
+                 (setf (stats-level st) (/ (stats-level st) (stats-count st)))
+                 (setf (stats-score st) (/ (stats-score st) (stats-count st)))
+                 (setf result (concatenate 'string result (stats-to-string st) "~%"))
         ))
+        (write-in-file result "./statistics.txt" nil)
         ))
   )
 )
 
 (defun stats-to-string (st)
-  (cons (get-mode-string (slot-value s 'mode)) 
-    (cons (" Tries: ") (cons (slot-value s 'tries) 
-      (cons ("AVG Level: ") (cons (slot-value s 'level) 
-        (cons ("AVG Score: ") (slot-value s 'score)))))))    
+  (concatenate 'string "Mode: " (get-mode-string (slot-value st 'mode)) 
+    " Tries: " (write-to-string (slot-value st 'tries))
+    " AVG Level: " (write-to-string (slot-value st 'level)) 
+    " AVG Score: " (write-to-string (slot-value st 'score)))
 )
 
 (defun get-mode-string(mode)
   (cond 
-    ((eq mode 0) "Human")
-    ((eq mode 1) "Random")
+    ((equal mode 0) "Human")
+    ((equal mode 1) "Random")
     (t "QLearning")
   )
 )
@@ -240,8 +248,8 @@
 (defun find-mode-tries-match (stats mode tries)
   (setf n nil)
   (loop 
-    for i from 1 to (length stats)
-    for st in stats do (if (and (eq mode (slot-value st 'mode)) ((eq tries (slot-value st 'tries)))) 
+    for i from 0 to (length stats)
+    for st in stats do (if (and (equal mode (slot-value st 'mode)) (equal tries (slot-value st 'tries))) 
                          (setf n i) 
                        ))
   n
@@ -249,14 +257,19 @@
 
 (defclass statistic ()
   ((mode
-    :initarg :mode)
+    :initarg :mode
+    :accessor stats-mode)
    (tries
-    :initarg :tries)
+    :initarg :tries
+    :accessor stats-tries)
    (level
-    :initarg :level)
+    :initarg :level
+    :accessor stats-level)
    (score 
-     :initarg :score)
+     :initarg :score
+     :accessor stats-score)
     (count 
-     :initarg :count)
+     :initarg :count
+     :accessor stats-count)
    )
 )
