@@ -46,7 +46,7 @@
  )
 
 (defun get-random-action (last-dir)
-	(print "get-random-action")
+	;;(print "get-random-action")
   (defparameter n (random 4))
 	(cond
         ((or (and (equalp 0 last-dir) (equalp n 2))
@@ -171,7 +171,7 @@
 ;;Statistics
 
 (defun write-in-file(string file append)
-  (with-open-file (str file
+  (with-open-file (str (concatenate 'string "./output/" file)
                      :direction :output
                      :if-exists (if append :append :supersede)
                      :if-does-not-exist :create)
@@ -180,67 +180,80 @@
 )
 
 (defun save-data(string)
-  (write-in-file (jobject-lisp-value string) "./data.txt" t)
+  (write-in-file (jobject-lisp-value string) "data.txt" t)
 )
 
 
 ;;mode+" "+triesCounter+" "+level+" "+score;
 (defun calc-save-stats()
-  (setf stats nil)
-  (with-open-file (stream "./data.txt"
-                     :direction :INPUT
-                     :if-does-not-exist nil)
-      (if stream (progn
-                   (setf line (get-line stream))
-                   (loop while (not (null line)) do (progn
-                     (setf mode (nth 0 line))
-                     (setf tries (nth 1 line))
-                     (if (null stats) 
-                       (setf n nil)
-                       (setf n (find-mode-tries-match stats mode tries)))
-                     
-                     (if n
-                       (progn
-                         (setf s (nth n stats))
-                         (setf (stats-mode s) mode)
-                         (setf (stats-tries s) tries)
-                         (setf (stats-level s) (+ (stats-level s) (nth 2 line)))
-                         (setf (stats-score s) (+ (stats-score s) (nth 3 line)))
-                         (setf (stats-count s) (+ (stats-count s) 1))
-                       ) 
-                       (setf stats (cons (make-instance 'statistic :mode mode 
-                                        :tries tries :level (nth 2 line) 
-                                        :score (nth 3 line) :count 1) 
-                                     stats))
-                       )
-                       (setf line (get-line stream))                              
-                      ))
-                   
-                  ;;(print stats)
-        ;;computing averages
-        (setf result "")
-        (loop for st in stats do (progn
-                 (setf (stats-level st) (/ (stats-level st) (stats-count st)))
-                 (setf (stats-score st) (/ (stats-score st) (stats-count st)))
-                 (setf result (concatenate 'string result (stats-to-string st) "~%"))
-        ))
-        (write-in-file result "./statistics.txt" nil)
-        ))
-  )
+	(setf stats nil)
+	(with-open-file (stream "./output/data.txt"
+		:direction :INPUT
+		:if-does-not-exist nil)
+		(if stream (progn
+			(setf line (get-line stream))
+			(loop while (not (null line)) do (progn
+				(setf mode (nth 0 line))
+				(setf tries (nth 1 line))
+				(if (null stats) 
+				(setf n nil)
+				(setf n (find-mode-tries-match stats mode tries)))
+				(if n ;;find-mode-tries-match
+					(progn
+					(setf s (nth n stats))
+					(setf (stats-mode s) mode)
+					(setf (stats-tries s) tries)
+					(setf (stats-level s) (+ (stats-level s) (nth 2 line)))
+					(setf (stats-score s) (+ (stats-score s) (nth 3 line)))
+					(setf (stats-count s) (+ (stats-count s) 1))
+					) 
+					(setf stats (cons (make-instance 'statistic :mode mode ;;else
+					:tries tries :level (nth 2 line) 
+					:score (nth 3 line) :count 1) 
+					stats))
+				)
+			(setf line (get-line stream))                              
+			))
+			;;(print stats)
+			;;computing averages
+			(setf result "")
+			(setf graph-result "")
+			(loop for st in stats do (progn
+				;;(setf (stats-level st) (/ (stats-level st) (stats-count st)))
+				;;(setf (stats-score st) (/ (stats-score st) (stats-count st)))
+				(setf result (concatenate 'string result (stats-to-string st) "~%"))
+				(setf graph-result (concatenate 'string graph-result (stats-to-string-graph-file st) "~%"))
+			))
+			(write-in-file result "statistics.txt" nil)
+			(write-in-file graph-result "graph-file-statistics.txt" nil)
+		))
+	)	
 )
 
 (defun stats-to-string (st)
   (concatenate 'string "Mode: " (get-mode-string (slot-value st 'mode)) 
     " Try: " (write-to-string (slot-value st 'tries))
-    " AVG Level: " (write-to-string (slot-value st 'level)) 
-    " AVG Score: " (write-to-string (slot-value st 'score)))
+    " AVG Level: " (write-to-string (float (/ (slot-value st 'level) (slot-value st 'count))))
+    " Rounds: " (write-to-string (slot-value st 'count))
+	" AVG Score: " (write-to-string (float (/ (slot-value st 'score) (slot-value st 'count))))
+	)
+)
+
+(defun stats-to-string-graph-file (st)
+  (concatenate 'string (get-mode-string (slot-value st 'mode)) 
+    ";" (write-to-string (slot-value st 'tries))
+    ";" (write-to-string (float (slot-value st 'level))) 
+    ";" (write-to-string (float (slot-value st 'score)))
+	";" (write-to-string (float (slot-value st 'count)))
+	)  
 )
 
 (defun get-mode-string(mode)
   (cond 
     ((equal mode 0) "Human")
     ((equal mode 1) "Random")
-    (t "QLearning")
+    ((equal mode 2) "QLearning")
+    ((equal mode 3) "QLearning")
   )
 )
   
@@ -250,13 +263,13 @@
  )
 
 (defun find-mode-tries-match (stats mode tries)
-  (setf n nil)
-  (loop 
-    for i from 0 to (length stats)
-    for st in stats do (if (and (equal mode (slot-value st 'mode)) (equal tries (slot-value st 'tries))) 
-                         (setf n i) 
-                       ))
-  n
+	(setf n nil)
+	(loop 
+		for i from 0 to (length stats)
+		for st in stats do (if (and (equal mode (slot-value st 'mode)) (equal tries (slot-value st 'tries))) 
+			(setf n i) 
+	))
+	n
 )
 
 (defclass statistic ()
@@ -276,4 +289,8 @@
      :initarg :count
      :accessor stats-count)
    )
+)
+
+(defun reset-learning ()
+	(setf weights '(0 0 0 0 0 0 0))
 )

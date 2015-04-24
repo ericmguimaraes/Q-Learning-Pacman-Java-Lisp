@@ -71,4 +71,8 @@ public class LispFunction {
 	public void calcSaveStats(){
 		connection.getFunction("calc-save-stats").execute();
 	}
+
+	public void resetLearning() {
+		connection.getFunction("reset-learning").execute();
+	}
 }

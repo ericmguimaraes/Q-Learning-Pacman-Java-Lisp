@@ -124,7 +124,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// ///**********************
 	// /// PARAMETROS DO ERIC
 	// ///**********************
-	private boolean pinte = true;
+	private boolean print = true;
 	private int countGames = 0;
 	private int jogosSemPintar = 0;
 	public static final int houseSize = 16;
@@ -143,7 +143,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	// GAME DESIGN CONTROL
 	public static enum GameMode {
-		HUMAN, RANDOM, QLEARNING, QLEARNINGTRAINED;
+		HUMAN, RANDOM, QLEARNING, QLEARNINGTRAINED, RANDOM_NO_PAINTED;
 	}
 
 	public static enum GameDifficulty {
@@ -162,27 +162,32 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static boolean levelBased = true;
 	private boolean shoudIMove = true;
 	public static boolean movimentControled = false;
-
+	public static int roundsToRun = 100;
+	
 	private void configGame(GameMode gm, GameDifficulty gd) {
 		gameMode = gm;
 		gameDifficulty = gd;
 
 		switch (gameMode) {
 		case HUMAN:
-			pinte = true;
+			print = true;
 			jogosSemPintar = 0;
 			break;
 		case RANDOM:
-			pinte = true;
+			print = true;
 			jogosSemPintar = 0;
 			break;
+		case RANDOM_NO_PAINTED:
+			print = false;
+			jogosSemPintar = 3*20*roundsToRun;
+			break;
 		case QLEARNING:
-			pinte = true;
+			print = true;
 			jogosSemPintar = 0;
 			break;
 		case QLEARNINGTRAINED:
-			pinte = false;
-			jogosSemPintar = 40;
+			print = false;
+			jogosSemPintar = 3*20*roundsToRun;
 			break;
 		}
 
@@ -245,7 +250,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lastState = new PacmanFeatures();
 
 		if(levelBased){
-			configGame(GameMode.QLEARNING, GameDifficulty.EASY);
+			configGame(GameMode.RANDOM_NO_PAINTED, GameDifficulty.EASY);
 		}else{
 			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 		}
@@ -438,7 +443,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	void paintUpdate(Graphics g) {
 		// updating the frame
-		if (pinte) {
+		if (print) {
 			powerDot.draw();
 
 			for (int i = 0; i < ghosts.length; i++)
@@ -517,11 +522,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					// System.out.println(getLastRewardsValue());
 
 					if (maze.iMaze[pac.iY / 16][pac.iX / 16] == Maze.BLANK) {
-						System.err.println("WALK");
+						if(print)System.err.println("WALK");
 						rewards.add(new Reward(RewardType.WALK));
 					}
 
-					if (gameMode == GameMode.RANDOM) {
+					if (gameMode == GameMode.RANDOM || gameMode == GameMode.RANDOM_NO_PAINTED ) {
 						int n = lisp.requestRandomMove(pac);
 						while (!isPossibleWalk(pac.iX, pac.iY, n)) {
 							n = lisp.requestRandomMove(pac);
@@ -580,11 +585,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			{
 				changeScore = 1;
 				score += 10 * ((round + 1) / 2);
-				System.err.println("DOT");
+				if(print)System.err.println("DOT");
 				rewards.add(new Reward(RewardType.DOT));
 			} else if (k == 2) // eaten a powerDot
 			{
-				System.err.println("POWER_DOT");
+				if(print)System.err.println("POWER_DOT");
 				rewards.add(new Reward(RewardType.POWER_DOT));
 				scoreGhost = 200;
 			}
@@ -605,7 +610,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				k = ghosts[i].testCollision(pac.iX, pac.iY);
 				if (k == 1) // kill pac
 				{
-					System.err.println("DIE");
+					if(print)System.err.println("DIE");
 					rewards.add(new Reward(RewardType.DIE));
 					// System.err.println(">>>>>>>TESTE<<<<<<<");
 					// for (int j = 0; j < rewards.size(); j++) {
@@ -618,7 +623,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					return;
 				} else if (k == 2) // caught by pac
 				{
-					System.err.println("EAT_GHOST");
+					if(print)System.err.println("EAT_GHOST");
 					rewards.add(new Reward(RewardType.EAT_GHOST));
 					score += scoreGhost * ((round + 1) / 2);
 					changeScore = 1;
@@ -665,9 +670,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				gameState = RUNNING;
 				countGames = countGames + 1;
 				if (countGames > jogosSemPintar) {
-					if (!pinte)
+					if (!print)
 						System.out.println(countGames + " Rounds Played");
-					pinte = true;
+					print = true;
 				}
 				// else
 				// return;
@@ -680,7 +685,16 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					move();
 				break;
 			case DEADWAIT:
-				lisp.calcSaveStats();
+				if(!print)System.out.println("DEADWAIT");
+				if(!(gameMode==GameMode.QLEARNINGTRAINED || gameMode==GameMode.RANDOM_NO_PAINTED)){
+					lisp.calcSaveStats();
+				}				
+				
+				int triesLimit = 20;
+				if(triesCounter>triesLimit-1){
+					lisp.calcSaveStats();
+					reset();
+				}
 				if (pacRemain > 0)
 					startRound();
 				else{ //final dead
@@ -795,7 +809,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public void run() {
 		while (true) {
 			try {
-				if (pinte)
+				if (print)
 					Thread.sleep(timerPeriod);
 			} catch (InterruptedException e) {
 				return;
@@ -886,5 +900,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		default:
 			return GameDifficulty.HARD;
 		}
+	}
+	
+	public void reset(){
+		triesCounter = 0;
+		lisp.resetLearning();
 	}
 }

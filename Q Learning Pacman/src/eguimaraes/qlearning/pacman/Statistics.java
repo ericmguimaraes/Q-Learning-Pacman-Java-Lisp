@@ -37,13 +37,18 @@ public class Statistics {
 	
 	@Override
 	public String toString() {
-		int mode;
+		int mode = 0;
 		switch(this.mode){
 			case HUMAN: mode = 0;
 			break;
 			case RANDOM: mode = 1;
 			break;
-			default: mode = 2;
+			case RANDOM_NO_PAINTED: mode = 1;
+			break;
+			case QLEARNING: mode = 2;
+			break;
+			case QLEARNINGTRAINED: mode = 2;
+			break;
 		}
 		return mode+" "+triesCounter+" "+level+" "+score;
 	}

@@ -1,0 +1,21 @@
+Mode: Random Try: 20 AVG Level: 1.0 Rounds: 100 AVG Score: 1045.2
+Mode: Random Try: 19 AVG Level: 1.0 Rounds: 100 AVG Score: 1025.2
+Mode: Random Try: 18 AVG Level: 1.0 Rounds: 100 AVG Score: 965.9
+Mode: Random Try: 17 AVG Level: 1.0 Rounds: 100 AVG Score: 1123.0
+Mode: Random Try: 16 AVG Level: 1.0 Rounds: 100 AVG Score: 1066.1
+Mode: Random Try: 15 AVG Level: 1.0 Rounds: 100 AVG Score: 1082.0
+Mode: Random Try: 14 AVG Level: 1.0 Rounds: 100 AVG Score: 1038.4
+Mode: Random Try: 13 AVG Level: 1.0 Rounds: 100 AVG Score: 1016.1
+Mode: Random Try: 12 AVG Level: 1.0 Rounds: 100 AVG Score: 1127.3
+Mode: Random Try: 11 AVG Level: 1.0 Rounds: 100 AVG Score: 986.9
+Mode: Random Try: 10 AVG Level: 1.0 Rounds: 100 AVG Score: 1028.0
+Mode: Random Try: 9 AVG Level: 1.0 Rounds: 100 AVG Score: 1124.5
+Mode: Random Try: 8 AVG Level: 1.0 Rounds: 100 AVG Score: 1024.1
+Mode: Random Try: 7 AVG Level: 1.0 Rounds: 100 AVG Score: 1097.5
+Mode: Random Try: 6 AVG Level: 0.99 Rounds: 100 AVG Score: 1040.0
+Mode: Random Try: 5 AVG Level: 0.99 Rounds: 100 AVG Score: 1066.1
+Mode: Random Try: 4 AVG Level: 0.99 Rounds: 100 AVG Score: 1050.5
+Mode: Random Try: 3 AVG Level: 0.99 Rounds: 100 AVG Score: 1091.0
+Mode: Random Try: 2 AVG Level: 0.990099 Rounds: 101 AVG Score: 1039.505
+Mode: Random Try: 1 AVG Level: 0.990099 Rounds: 101 AVG Score: 1028.5149
+
