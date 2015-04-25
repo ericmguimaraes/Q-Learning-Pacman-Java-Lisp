@@ -5,14 +5,17 @@ public class FeaturesExtraction {
 	private static FeaturesExtraction instance;
 
 	private GamePlayState game;
+	
+	private Dijkstra dijkstra;
 
-	private FeaturesExtraction(GamePlayState game) {
+	private FeaturesExtraction(GamePlayState game, Maze maze) {
 		this.game = game;
+		dijkstra = new Dijkstra(maze);
 	}
 
-	public static FeaturesExtraction getInstance(GamePlayState state) {
+	public static FeaturesExtraction getInstance(GamePlayState state, Maze maze) {
 		if (instance == null)
-			instance = new FeaturesExtraction(state);
+			instance = new FeaturesExtraction(state, maze);
 		return instance;
 	}
 
@@ -65,7 +68,7 @@ public class FeaturesExtraction {
 	}
 
 	public float getClosestFoodDistance(int x, int y) {
-		int distance = Maze.HEIGHT + Maze.WIDTH;
+		/*int distance = Maze.HEIGHT + Maze.WIDTH;
 		for (int h = 0; h < Maze.HEIGHT; h++) {
 			for (int w = 0; w < Maze.WIDTH; w++) {
 				if (getManhatanDistance(x, y, w, h) < distance
@@ -73,9 +76,13 @@ public class FeaturesExtraction {
 					distance = getManhatanDistance(x, y, w, h);
 			}
 		}
+		*/
+		int distance = dijkstra.getDistanceToTheClosestDot(x, y);
+		System.err.println("DISTANCE: "+distance);
 		float n = ((float) distance / 30);
 		//System.out.println("Distance: "+n);
-		return n;
+		return n; 
+		
 	}
 
 	

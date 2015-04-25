@@ -162,7 +162,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static boolean levelBased = true;
 	private boolean shoudIMove = true;
 	public static boolean movimentControled = false;
-	public static int roundsToRun = 100;
+	public static int roundsToRun = 10;
 	
 	private void configGame(GameMode gm, GameDifficulty gd) {
 		gameMode = gm;
@@ -244,13 +244,13 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		// LISP
 		lisp = LispFunction.getInstance(this);
-		featuresExtractor = FeaturesExtraction.getInstance(this);
+		
 		rewards = new ArrayList<Reward>();
 		lastAction = 1;
 		lastState = new PacmanFeatures();
 
 		if(levelBased){
-			configGame(GameMode.RANDOM_NO_PAINTED, GameDifficulty.EASY);
+			configGame(GameMode.QLEARNINGTRAINED, GameDifficulty.EASY);
 		}else{
 			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 		}
@@ -311,7 +311,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 		// initialize maze object
 		maze = new Maze(this, offScreenG, mapDesgin);
-
+		
+		featuresExtractor = FeaturesExtraction.getInstance(this, maze);
+		
 		// initialize ghosts object
 		// 4 ghosts
 		ghostsInit();

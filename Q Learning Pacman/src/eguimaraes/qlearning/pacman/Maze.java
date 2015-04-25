@@ -50,7 +50,7 @@ public class Maze {
 	// total dots left
 	int iTotalDotcount;
 
-	// the status of maze
+	// the status of maze  [Y,X]
 	int[][] iMaze;
 	
 	int mapDesgin;
@@ -337,4 +337,49 @@ public class Maze {
 		}
 	}
 
+	public class Position {
+		int x;
+		int y;
+
+		public Position(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+	}
+	
+	public Position[] getNeighbors(int x, int y){
+		Position[] pos = null;
+		if(isBlocked(x,y)) return pos;
+		Position[] aux = new Position[4]; 
+		aux[0] = getNeighbor(x, y-1);
+		aux[1] = getNeighbor(x, y+1);
+		aux[2] = getNeighbor(x-1, y);
+		aux[3] = getNeighbor(x+1, y);
+		int count = 0;
+		for (int i = 0; i < aux.length; i++) {
+			if(aux[i]!=null) count++;
+		}
+		pos = new Position[count];
+		for (int i = 0; i < pos.length; i++) {
+			if(aux[i]!=null) pos[count-1] = aux[i];
+			count--;
+		}
+		return pos;
+	}
+	
+	private Position getNeighbor(int x, int y){
+		if(!isBlocked(x, y))
+			if(isDot(x, y))
+				return new Position(x, y-1);
+		return null;
+	}
+	
+	public boolean isBlocked(int x, int y){
+		return (iMaze[y][x] == DOOR || iMaze[y][x] == WALL);
+	}
+	
+	public boolean isDot(int x, int y){
+		return (iMaze[y][x] == DOT || iMaze[y][x] == POWER_DOT);
+	}
+	
 }
