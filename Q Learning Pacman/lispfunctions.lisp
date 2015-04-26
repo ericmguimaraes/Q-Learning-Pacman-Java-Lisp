@@ -68,8 +68,8 @@
 ;;Qlearning
 
 (defparameter epsilon 0) ;; exploration rate
-(defparameter gamma 0.1);; discount factor
-(defparameter alpha 0.1);; learning rate
+(defparameter gamma 0.01);; discount factor
+(defparameter alpha 0.01);; learning rate
 (defparameter weights '(0 0 0 0 0 0 0))
 (defparameter count 0)
 
@@ -79,14 +79,23 @@
 ;;take the best policy action otherwise.  Note that if there are
 ;;no legal actions the return is nil
 (defun get-action()
-  
-  ;;(make-instance 'statistic :mode mode :tries tries :level (nth 2 line) :score (nth 3 line) :count 1)
-  
-  
+ (review-alpha)
  (if (flip-coin epsilon) 
     (get-random-action (get-last-dir))
     (compute-action-from-qvalues)
-  )
+ )
+)
+
+(defun review-alpha()
+  (setf count (+ count 1))
+  ;(if (> count 60) (setf alpha 0.1))
+  ;(if (> count 300) (setf alpha 0.05))
+ ; (if (> count 400) (setf alpha 0.01))
+  ;(if (> count 500) (setf alpha 0.001))
+  ;(if (> count 2000) (setf alpha 0.0001)) 
+  (if (eq count 1) (setf alpha 0.01))
+  (print alpha)
+  (print count)
 )
 
 ;;choose best action based in the getQValue(state, action)
@@ -94,6 +103,13 @@
   (setf actions (get-legal-actions))
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
+; (print "*********1************")
+;  (loop for action in actions do (progn
+;                                   (print action)
+;                                   (print (get-q-value-from-action action))
+;                                   ))
+;  (print "*********2************")
+                                   
   (loop for action in actions do (if (>= (get-q-value-from-action action) q) (progn 
                                           (setf best-action action) 
                                           (setf q (get-q-value-from-action action))
@@ -117,8 +133,8 @@
   (setf next-state (mapcar #'(lambda (x) (/ x n)) (string-to-list (jobject-lisp-value next-state))))
   (setf reward (jobject-lisp-value reward))
   (setf feat '(dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
-  (print (mapcar #'cons feat state))
-  (print reward)
+;  (print (mapcar #'cons feat state))
+;  (print reward)
   ;;(print (mapcar #'cons feat next-state))
   (setf max-q (get-qmax))
   (setf difference (- (+ reward (* gamma max-q)) (get-q-value-from-features state)))
@@ -128,10 +144,27 @@
 
 ;;return Q(state,action) = w * featureVector
 (defun get-q-value-from-action(action)
+  ;(print "get-q-value-from-action")
+  ;(print (apply '+ (mapcar #'float (mapcar #'* (mapcar #'float weights) (mapcar #'float (get-features-act action))))))
+ ; (setf features (get-features-act action))
+;  (setf sum 0)
+  ;(loop 
+      
+	;	for f in features
+	;	for w in weights do (progn
+          ;              (print "feature embaixo:")
+            ;            (print f)
+            ;            (print "weight embaixo:")
+               ;         (print w)
+                 ;       (setf sum (+ sum (* w f)))))
   (apply '+ (mapcar #'* weights (get-features-act action)))
+ ; sum
+  
 )
 
 (defun get-q-value-from-features(state)
+  ;(print "get-q-value-from-features")
+ ; (print (apply '+ (mapcar #'* weights state)))
   (apply '+ (mapcar #'* weights state))
 )
 
@@ -155,7 +188,6 @@
 )
 
 (defun get-features-act (action)
-(setf n 100000)
   (mapcar #'(lambda (x) (/ x 100000)) (string-to-list (call-java-param-int "getFeatures" action)))
 )
 
@@ -293,4 +325,5 @@
 
 (defun reset-learning ()
 	(setf weights '(0 0 0 0 0 0 0))
+    (setf count 0)
 )

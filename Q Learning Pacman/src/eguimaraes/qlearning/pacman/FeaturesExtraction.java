@@ -28,8 +28,7 @@ public class FeaturesExtraction {
 		int[] result = new int[2];
 		switch (action) {
 		case 0:
-			if (game.maze.iMaze[y][x + 1] != Maze.WALL
-					&& game.maze.iMaze[y][x + 1] != Maze.DOOR) {
+			if (!game.maze.isBlocked(x + 1, y)) {
 				result[0] = x + 1;
 			} else {
 				result[0] = x;
@@ -37,8 +36,7 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 1:
-			if (game.maze.iMaze[y - 1][x] != Maze.WALL
-					&& game.maze.iMaze[y - 1][x] != Maze.DOOR) {
+			if (!game.maze.isBlocked(x, y-1)) {
 				result[1] = y - 1;
 			} else {
 				result[1] = y;
@@ -46,8 +44,7 @@ public class FeaturesExtraction {
 			result[0] = x;
 			break;
 		case 2:
-			if (game.maze.iMaze[y][x - 1] != Maze.WALL
-					&& game.maze.iMaze[y][x - 1] != Maze.DOOR) {
+			if (!game.maze.isBlocked(x - 1, y)) {
 				result[0] = x - 1;
 			} else {
 				result[0] = x;
@@ -55,9 +52,47 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 3:
-			if (game.maze.iMaze[y + 1][x] != Maze.WALL
-					&& game.maze.iMaze[y + 1][x] != Maze.DOOR) {
+			if (!game.maze.isBlocked(x , y+1)) {
 				result[1] = y + 1;
+			} else {
+				result[1] = y;
+			}
+			result[0] = x;
+			break;
+		}
+		return result;
+	}
+	
+	public int[] getNewPositionNOTHOUSESIZE(int x, int y, int action) {
+		int[] result = new int[2];
+		switch (action) {
+		case 0:
+			if (!game.maze.isBlocked(toHouseSize(x + 16), toHouseSize(y))) {
+				result[0] = x + 16;
+			} else {
+				result[0] = x;
+			}
+			result[1] = y;
+			break;
+		case 1:
+			if (!game.maze.isBlocked(toHouseSize(x), toHouseSize(y-16))) {
+				result[1] = y - 16;
+			} else {
+				result[1] = y;
+			}
+			result[0] = x;
+			break;
+		case 2:
+			if (!game.maze.isBlocked(toHouseSize(x - 16), toHouseSize(y))) {
+				result[0] = x - 16;
+			} else {
+				result[0] = x;
+			}
+			result[1] = y;
+			break;
+		case 3:
+			if (!game.maze.isBlocked(toHouseSize(x) , toHouseSize(y+16))) {
+				result[1] = y + 16;
 			} else {
 				result[1] = y;
 			}
@@ -78,11 +113,12 @@ public class FeaturesExtraction {
 		}
 		*/
 		int distance = dijkstra.getDistanceToTheClosestDot(x, y);
-		System.err.println("DISTANCE: "+distance);
-		float n = ((float) distance / 30);
+		if(distance<0)distance=0;
+		//System.err.println("DISTANCE: "+distance);
+
+		float n = ((float) distance / 60);
 		//System.out.println("Distance: "+n);
 		return n; 
-		
 	}
 
 	
@@ -113,15 +149,16 @@ public class FeaturesExtraction {
 		return 0;
 	}
 	
-	public int getNumGhost1stepAway(int x, int y) {
-		int countGhost = 0;
+	public float getNumGhost1stepAway(int x, int y) {
+		float countGhost = 0;
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if (game.ghosts[i].iStatus == Ghost.BLIND)
 				continue;
 			if (isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY, 20))
 				countGhost++;
 		}
-		return countGhost;
+		float n = ((float) countGhost/4);
+		return n;
 	}
 
 	public boolean isCollision(int iPacX, int iPacY, int xG, int yG, int pixels) {
@@ -152,7 +189,7 @@ public class FeaturesExtraction {
 		}
 		//if(count != 0)System.out.println(distance);
 		float n = ((float) distance /  (Maze.HEIGHT*16 + Maze.WIDTH*16));
-		return count != 0 ? n : 0;
+		return 0;//count != 0 ? n : 0;
 	}
 
 	public int getisTurningBack(int newdir) {
@@ -198,20 +235,14 @@ public class FeaturesExtraction {
 
 	private PacmanFeatures getFeaturesAUX(int x, int y, int newx, int newy) {
 		PacmanFeatures result = new PacmanFeatures();
-		boolean follower = getNumGhost1stepAway(newx, newy) > 0;
-		result.setClosestFoodDistance(follower ? 0 : getClosestFoodDistance(
-				newx, newy));
-		result.setClosestGhostToEatDistance(follower ? 0
-				: getClosestGhostToEatDistance(x, y));
+		boolean follower = (getNumGhost1stepAway(newx, newy) > 0 || getBeEaten(x, y)==1);
+		result.setClosestFoodDistance(follower ? 0 : getClosestFoodDistance(newx, newy));
+		result.setClosestGhostToEatDistance(follower ? 0 : getClosestGhostToEatDistance(x, y));
 		result.setEatDot(follower ? 0 : getEatDot(newx, newy));
 		result.setEatGhost(getEatGhost(x, y));
 		result.setEatPowerDot(follower ? 0 : getEatPowerDot(newx, newy));
 		result.setNumGhost1stepAway(getNumGhost1stepAway(x, y));
 		result.setBeEaten(getBeEaten(x, y));
-		// if(result.getBeEaten()!=0){
-		// System.out.println("VAI SER COMIDO CARAI");
-		// GamePlayState.movimentControled = true;
-		// }
 		return result;
 	}
 

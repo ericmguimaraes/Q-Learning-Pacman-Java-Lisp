@@ -345,6 +345,11 @@ public class Maze {
 			this.x = x;
 			this.y = y;
 		}
+		
+		@Override
+		public String toString() {
+			return x+" : "+y;
+		}
 	}
 	
 	public Position[] getNeighbors(int x, int y){
@@ -360,17 +365,18 @@ public class Maze {
 			if(aux[i]!=null) count++;
 		}
 		pos = new Position[count];
-		for (int i = 0; i < pos.length; i++) {
-			if(aux[i]!=null) pos[count-1] = aux[i];
-			count--;
+		for (int i = 0; i < aux.length; i++) {
+			if(aux[i]!=null){
+				pos[count-1] = aux[i];
+				count--;
+			}
 		}
 		return pos;
 	}
 	
 	private Position getNeighbor(int x, int y){
 		if(!isBlocked(x, y))
-			if(isDot(x, y))
-				return new Position(x, y-1);
+				return new Position(x, y);
 		return null;
 	}
 	

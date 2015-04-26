@@ -44,8 +44,8 @@ public class LispFunction {
 	}
 	
 	public void update(Features lastState, int lastAction, Features stateResult, int reward) {
-		connection.getFunction("update").execute(new JavaObject(lastState.toString1000()), new JavaObject(lastAction),
-				new JavaObject(stateResult.toString1000()), new JavaObject(reward));
+		connection.getFunction("update").execute(new JavaObject(lastState.toString()), new JavaObject(lastAction),
+				new JavaObject(stateResult.toString()), new JavaObject(reward));
 	}
 	
 	public String getFeatures(int action){
