@@ -147,7 +147,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	}
 
 	public static enum GameDifficulty {
-		VERY_EASY, EASY, NORMAL, HARD, CUSTOM;
+		VERY_EASY, EASY, NORMAL, HARD, CUSTOM, VERY_HARD;
 	}
 
 	public static GameMode gameMode;
@@ -162,7 +162,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static boolean levelBased = true;
 	private boolean shoudIMove = true;
 	public static boolean movimentControled = false;
-	public static int roundsToRun = 10;
+	public static int roundsToRun = 200;
 	public static int counterTest = 0;
 
 	private void configGame(GameMode gm, GameDifficulty gd) {
@@ -220,6 +220,14 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		case HARD:
 			numberOfGhosts = 6;
 			ghostBlindTime = 400;
+			ghostSpeed = 3;
+			mapDesgin = 1;
+			pacmanSpeed = 1;
+			alwaysBlind = false;
+			break;
+		case VERY_HARD:
+			numberOfGhosts = 10;
+			ghostBlindTime = 200;
 			ghostSpeed = 3;
 			mapDesgin = 1;
 			pacmanSpeed = 1;
@@ -312,7 +320,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		// initialize maze object
 		maze = new Maze(this, offScreenG, mapDesgin);
 
-		featuresExtractor = FeaturesExtraction.getInstance(this, maze);
+		featuresExtractor = FeaturesExtraction.getInstance(this);
 
 		// initialize ghosts object
 		// 4 ghosts
@@ -551,10 +559,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 								((PacmanFeatures) lastState).setEatDot(0);
 								((PacmanFeatures) lastState).setEatPowerDot(0);
 								((PacmanFeatures) lastState).setEatGhost(0);
+								((PacmanFeatures) lastState).setClosestFoodDistance(0);
+								
 							}
 							if (r > 0) {//ruins
 								((PacmanFeatures) lastState).setNumGhost1stepAway(0);
-								((PacmanFeatures) lastState).setClosestFoodDistance(0);
 								((PacmanFeatures) lastState).setBeEaten(0);
 								((PacmanFeatures) lastState).setClosestGhostToEatDistance(0);
 							}
@@ -700,7 +709,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					move();
 				break;
 			case DEADWAIT:
-				if (!print)
+				if (print)
 					System.out.println("DEADWAIT");
 				gameDifficulty = getGameDifficulty(level);
 				if (!(gameMode == GameMode.QLEARNINGTRAINED || gameMode == GameMode.RANDOM_NO_PAINTED)) {
@@ -721,6 +730,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					statistics.setScore(score);
 					statistics.setTriesCounter(triesCounter);
 					lisp.saveData(statistics.toString());
+					level = 0;
+					configGame(gameMode, getGameDifficulty(level));
+					initImages();
 					startGame();
 				}
 
@@ -914,8 +926,12 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 			return GameDifficulty.NORMAL;
 		case 2:
 			return GameDifficulty.HARD;
-		default:
+		case 4:
 			return GameDifficulty.HARD;
+		case 5:
+			return GameDifficulty.VERY_HARD;
+		default:
+			return GameDifficulty.VERY_HARD;
 		}
 	}
 

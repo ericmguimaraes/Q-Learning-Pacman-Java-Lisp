@@ -42,17 +42,12 @@ class Edge {
 
 public class Dijkstra {
 
-	private Maze maze;
 
-	public Dijkstra(Maze maze) {
-		this.maze = maze;
+	private ArrayList<Vertex> mazeToGraph(Maze maze) {
+		return createEdges(mazeToVertexs(maze), maze);
 	}
 
-	private ArrayList<Vertex> mazeToGraph() {
-		return createEdges(mazeToVertexs());
-	}
-
-	private ArrayList<Vertex> mazeToVertexs() {
+	private ArrayList<Vertex> mazeToVertexs(Maze maze) {
 		ArrayList<Vertex> graph = new ArrayList<>();
 		for (int i = 0; i < maze.WIDTH; i++) {
 			for (int j = 0; j < maze.HEIGHT; j++) {
@@ -63,7 +58,7 @@ public class Dijkstra {
 		return graph;
 	}
 
-	private ArrayList<Vertex> createEdges(ArrayList<Vertex> list) {
+	private ArrayList<Vertex> createEdges(ArrayList<Vertex> list, Maze maze) {
 		Maze.Position[] positions;
 		for (Vertex vertex : list) {
 			positions = maze.getNeighbors(vertex.x, vertex.y);
@@ -123,8 +118,8 @@ public class Dijkstra {
 		return path;
 	}
 
-	public int getDistanceToTheClosestDot(int x, int y) {
-		ArrayList<Vertex> mazeGraph = mazeToGraph();
+	public int getDistanceToTheClosestDot(int x, int y, Maze maze) {
+		ArrayList<Vertex> mazeGraph = mazeToGraph(maze);
 		computePaths(getVertexByPos(mazeGraph, x, y));
 		
 		int disClosestDot = maze.WIDTH * maze.HEIGHT;
@@ -137,6 +132,21 @@ public class Dijkstra {
 			}
 		}
 		return disClosestDot;
+	}
+	
+	
+	public int getDistanceToTheClosestEatableGhost(int x, int y, Ghost[] ghosts, Maze maze) {
+		ArrayList<Vertex> mazeGraph = mazeToGraph(maze);
+		computePaths(getVertexByPos(mazeGraph, x, y));
+		
+		int disClosestGhost = maze.WIDTH * maze.HEIGHT;
+		for (int i = 0; i < ghosts.length; i++) {
+				Vertex v = getVertexByPos(mazeGraph, FeaturesExtraction.toHouseSize(ghosts[i].iX), FeaturesExtraction.toHouseSize(ghosts[i].iX));
+				if (v != null && ghosts[i].iStatus == Ghost.BLIND)
+					if (v.minDistance < disClosestGhost)
+						disClosestGhost = (int) v.minDistance;
+		}
+		return disClosestGhost==maze.WIDTH * maze.HEIGHT?0:disClosestGhost;
 	}
 
 	/*

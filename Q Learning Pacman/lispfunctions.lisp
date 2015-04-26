@@ -92,10 +92,10 @@
   ;(if (> count 300) (setf alpha 0.05))
  ; (if (> count 400) (setf alpha 0.01))
   ;(if (> count 500) (setf alpha 0.001))
-  ;(if (> count 2000) (setf alpha 0.0001)) 
+  (if (> count 1500) (setf alpha 0.0001)) 
   (if (eq count 1) (setf alpha 0.01))
-  (print alpha)
-  (print count)
+ ; (print alpha)
+  ;(print count)
 )
 
 ;;choose best action based in the getQValue(state, action)
@@ -104,11 +104,13 @@
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
 ; (print "*********1************")
-;  (loop for action in actions do (progn
-;                                   (print action)
-;                                   (print (get-q-value-from-action action))
-;                                   ))
-;  (print "*********2************")
+ ; (loop for action in actions do (progn
+   ;                                (print action)
+  ;                                 (print (get-q-value-from-action action))
+  ;                                 (setf feat '(dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
+  ;                                  (print (mapcar #'cons feat (get-features-act action)))
+  ;                                 ))
+ ; (print "*********2************")
                                    
   (loop for action in actions do (if (>= (get-q-value-from-action action) q) (progn 
                                           (setf best-action action) 
@@ -139,7 +141,7 @@
   (setf max-q (get-qmax))
   (setf difference (- (+ reward (* gamma max-q)) (get-q-value-from-features state)))
   (setf weights (mapcar #'(lambda (w f) (+ w (* alpha difference f))) weights state))
-  (print (mapcar #'cons feat weights))
+  ;(print (mapcar #'cons feat weights))
 )
 
 ;;return Q(state,action) = w * featureVector
