@@ -91,6 +91,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	Graphics imgScoreG;
 	Image imgHiScore;
 	Graphics imgHiScoreG;
+	Image imgLevel;
+	Graphics imgLevelG;
+	
 
 	// game status
 	final int INITIMAGE = 100; // need to wait before paint anything
@@ -259,7 +262,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lastState = new PacmanFeatures();
 
 		if (levelBased) {
-			configGame(GameMode.QLEARNINGTRAINED, GameDifficulty.EASY);
+			configGame(GameMode.QLEARNING, GameDifficulty.EASY);
 		} else {
 			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 		}
@@ -334,22 +337,30 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		pac = new Pacman(this, offScreenG, maze, powerDot, pacmanSpeed);
 
 		// initialize the score images
-		imgScore = createImage(150, 16);
+		imgScore = createImage(125, 16);
 		imgScoreG = imgScore.getGraphics();
-		imgHiScore = createImage(150, 16);
+		imgHiScore = createImage(125, 16);
 		imgHiScoreG = imgHiScore.getGraphics();
+		imgLevel = createImage(125, 16);
+		imgLevelG = imgLevel.getGraphics();
 
 		imgHiScoreG.setColor(Color.black);
-		imgHiScoreG.fillRect(0, 0, 150, 16);
+		imgHiScoreG.fillRect(0, 0, 125, 16);
 		imgHiScoreG.setColor(Color.red);
 		imgHiScoreG.setFont(new Font("Helvetica", Font.BOLD, 12));
 		imgHiScoreG.drawString("HI SCORE", 0, 14);
 
 		imgScoreG.setColor(Color.black);
-		imgScoreG.fillRect(0, 0, 150, 16);
+		imgScoreG.fillRect(0, 0, 125, 16);
 		imgScoreG.setColor(Color.green);
 		imgScoreG.setFont(new Font("Helvetica", Font.BOLD, 12));
 		imgScoreG.drawString("SCORE", 0, 14);
+		
+		imgLevelG.setColor(Color.black);
+		imgLevelG.fillRect(0, 0, 125, 16);
+		imgLevelG.setColor(Color.yellow);
+		imgLevelG.setFont(new Font("Helvetica", Font.BOLD, 12));
+		imgLevelG.drawString("Level", 0, 14);
 	}
 
 	private void ghostsInit() {
@@ -471,8 +482,8 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				imgHiScoreG.fillRect(70, 0, 80, 16);
 				imgHiScoreG.setColor(Color.red);
 				imgHiScoreG.drawString(Integer.toString(hiScore), 70, 14);
-				g.drawImage(imgHiScore, 8 + leftOffset, 0 + topOffset, this);
-
+				g.drawImage(imgHiScore, 5 + leftOffset, 0 + topOffset, this);
+				
 				changeHiScore = 0;
 			}
 
@@ -481,7 +492,13 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				imgScoreG.fillRect(70, 0, 80, 16);
 				imgScoreG.setColor(Color.green);
 				imgScoreG.drawString(Integer.toString(score), 70, 14);
-				g.drawImage(imgScore, 158 + leftOffset, 0 + topOffset, this);
+				g.drawImage(imgScore, 130 + leftOffset, 0 + topOffset, this);
+				
+				imgLevelG.setColor(Color.black);
+				imgLevelG.fillRect(70, 0, 80, 16);
+				imgLevelG.setColor(Color.yellow);
+				imgLevelG.drawString(Integer.toString(level), 70, 14);
+				g.drawImage(imgLevel, 255 + leftOffset, 0 + topOffset, this);
 
 				changeScore = 0;
 			}
@@ -622,6 +639,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				newMaze = true;
 				round++;
 				level++;
+				score = score + 1000;
 				gameDifficulty = getGameDifficulty(level);
 				configGame(gameMode, gameDifficulty);
 				initImages();
