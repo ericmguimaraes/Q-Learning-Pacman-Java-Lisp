@@ -26,9 +26,9 @@ import java.awt.event.*;
 class About extends Window implements MouseListener {
 	private static final long serialVersionUID = -6444989674095739037L;
 
-	final String[] about = { "", "javaiPacman", "",
-			"  - Copyright 1997-2010 Junyang Gu <mikejyg@gmail.com>", "",
-			"an intelligent pacman game implmented in Java", "" };
+	final String[] about = { "", "", "",
+			" ", "",
+			"", "" };
 
 	About(Frame parent) {
 		super(parent);

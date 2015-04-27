@@ -262,7 +262,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		lastState = new PacmanFeatures();
 
 		if (levelBased) {
-			configGame(GameMode.QLEARNING, GameDifficulty.EASY);
+			configGame(GameMode.RANDOM_NO_PAINTED, GameDifficulty.EASY);
 		} else {
 			configGame(GameMode.QLEARNING, GameDifficulty.NORMAL);
 		}
