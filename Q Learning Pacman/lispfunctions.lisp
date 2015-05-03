@@ -103,14 +103,14 @@
   (setf actions (get-legal-actions))
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
-; (print "*********1************")
- ; (loop for action in actions do (progn
-   ;                                (print action)
-  ;                                 (print (get-q-value-from-action action))
-  ;                                 (setf feat '(dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
-  ;                                  (print (mapcar #'cons feat (get-features-act action)))
-  ;                                 ))
- ; (print "*********2************")
+ (print "*********1************")
+  (loop for action in actions do (progn
+                                   (print action)
+                                   (print (get-q-value-from-action action))
+                                   (setf feat '(1/dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
+                                    (print (mapcar #'cons feat (get-features-act action)))
+                                   ))
+  (print "*********2************")
                                    
   (loop for action in actions do (if (>= (get-q-value-from-action action) q) (progn 
                                           (setf best-action action) 
@@ -134,14 +134,14 @@
   (setf action (jobject-lisp-value action))
   (setf next-state (mapcar #'(lambda (x) (/ x n)) (string-to-list (jobject-lisp-value next-state))))
   (setf reward (jobject-lisp-value reward))
-  (setf feat '(dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
+  (setf feat '(1/dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
 ;  (print (mapcar #'cons feat state))
 ;  (print reward)
   ;;(print (mapcar #'cons feat next-state))
   (setf max-q (get-qmax))
   (setf difference (- (+ reward (* gamma max-q)) (get-q-value-from-features state)))
   (setf weights (mapcar #'(lambda (w f) (+ w (* alpha difference f))) weights state))
-  ;(print (mapcar #'cons feat weights))
+  (print (mapcar #'cons feat weights))
 )
 
 ;;return Q(state,action) = w * featureVector
