@@ -384,8 +384,12 @@ public class Maze {
 		return (iMaze[y][x] == DOOR || iMaze[y][x] == WALL);
 	}
 	
-	public boolean isDot(int x, int y){
+	public boolean isDotOrPowerDot(int x, int y){
 		return (iMaze[y][x] == DOT || iMaze[y][x] == POWER_DOT);
+	}
+	
+	public boolean isPowerDot(int x, int y){
+		return (iMaze[y][x] == POWER_DOT);
 	}
 	
 }

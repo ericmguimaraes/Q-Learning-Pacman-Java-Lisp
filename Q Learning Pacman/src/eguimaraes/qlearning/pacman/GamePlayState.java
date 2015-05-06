@@ -116,7 +116,11 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	MenuBar menuBar;
 	Menu help;
 	MenuItem about;
-
+	Menu mode;
+	MenuItem human;
+	MenuItem qlearning;
+	MenuItem random;
+	
 	// the direction specified by key
 	int pacKeyDir;
 	int key = 0;
@@ -165,7 +169,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	public static boolean levelBased = true;
 	private boolean shoudIMove = true;
 	public static boolean movimentControled = false;
-	public static int roundsToRun = 200;
+	public static int roundsToRun = 300;
 	public static int counterTest = 0;
 
 	private void configGame(GameMode gm, GameDifficulty gd) {
@@ -281,6 +285,9 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		addKeyListener(this);
 
 		about.addActionListener(this);
+		random.addActionListener(this);
+		human.addActionListener(this);
+		qlearning.addActionListener(this);
 
 		if (mapDesgin == 2) {
 			canvasWidth = canvasWidth * 2;
@@ -295,12 +302,23 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 	void initGUI() {
 		menuBar = new MenuBar();
-		help = new Menu("HELP");
+		mode = new Menu("Mode");
+		help = new Menu("Help");
+		
 		about = new MenuItem("About");
+		human = new MenuItem("Human");
+		qlearning = new MenuItem("Qlearning");
+		random = new MenuItem("Random");
 
 		help.add(about);
-		menuBar.add(help);
+		
+		mode.add(human);
+		mode.add(qlearning);
+		mode.add(random);
 
+		menuBar.add(mode);
+		menuBar.add(help);
+		
 		setMenuBar(menuBar);
 
 		addNotify(); // for updated inset information
@@ -427,6 +445,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 		if (gameState == INITIMAGE) {
 			// System.out.println("first paint(...)...");
 
+			ghostsInit();
 			// init images, must be done after show() because of Graphics
 			initImages();
 
@@ -561,6 +580,10 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 						while (!isPossibleWalk(pac.iX, pac.iY, n)) {
 							n = lisp.requestRandomMove(pac);
 						}
+						if (!firstAction)
+							lisp.update(lastState, lastAction,
+									featuresExtractor.getFeatures(pac.iX,
+											pac.iY), getLastRewardsValue());
 						// System.out.println(featuresExtractor.getFeatures(pac.iX,pac.iY,
 						// n));
 						lastAction = n;
@@ -573,16 +596,17 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 
 							int r = getLastRewardsValue();
 							if (r < 0) {//bons
-								((PacmanFeatures) lastState).setEatDot(0);
-								((PacmanFeatures) lastState).setEatPowerDot(0);
-								((PacmanFeatures) lastState).setEatGhost(0);
-								((PacmanFeatures) lastState).setClosestFoodDistance(0);
+//								((PacmanFeatures) lastState).setEatDot(0);
+//								((PacmanFeatures) lastState).setEatPowerDot(0);
+//								((PacmanFeatures) lastState).setEatGhost(0);
+								((PacmanFeatures) lastState).setDistDot(0);
+								((PacmanFeatures) lastState).setDistGhostBlind(0);
 								
 							}
 							if (r > 0) {//ruins
 								((PacmanFeatures) lastState).setNumGhost1stepAway(0);
 								((PacmanFeatures) lastState).setBeEaten(0);
-								((PacmanFeatures) lastState).setClosestGhostToEatDistance(0);
+								((PacmanFeatures) lastState).setDistGhostActive(0);
 							}
 							if (!firstAction)
 								lisp.update(lastState, lastAction, stateResult,
@@ -642,6 +666,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 				score = score + 1000;
 				gameDifficulty = getGameDifficulty(level);
 				configGame(gameMode, gameDifficulty);
+				ghostsInit();
 				initImages();
 				return;
 			}
@@ -750,6 +775,7 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 					lisp.saveData(statistics.toString());
 					level = 0;
 					configGame(gameMode, getGameDifficulty(level));
+					ghostsInit();
 					initImages();
 					startGame();
 				}
@@ -819,9 +845,25 @@ public class GamePlayState extends Frame implements Runnable, KeyListener,
 	// handles menu event
 	// ///////////////////////////////////////////////
 	public void actionPerformed(ActionEvent e) {
-		if (gameState == RUNNING)
-			key = SUSPEND;
-		new About(this);
+		switch (e.getActionCommand()) {
+		case "Random":
+			configGame(GameMode.RANDOM, gameDifficulty);
+			lastAction = lisp.requestRandomMove(pac);
+			break;
+		case "Qlearning":
+			configGame(GameMode.QLEARNING, gameDifficulty);
+			lastAction = lisp.requestQLearningMove();
+			break;
+		case "Human":
+			configGame(GameMode.HUMAN, gameDifficulty);
+			break;
+		case "About":
+			new About(this);
+			break;	
+		default:
+			break;
+		}
+		
 		// e.consume();
 	}
 

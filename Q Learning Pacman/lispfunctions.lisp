@@ -46,7 +46,6 @@
  )
 
 (defun get-random-action (last-dir)
-	;;(print "get-random-action")
   (defparameter n (random 4))
 	(cond
         ((or (and (equalp 0 last-dir) (equalp n 2))
@@ -70,7 +69,7 @@
 (defparameter epsilon 0) ;; exploration rate
 (defparameter gamma 0.01);; discount factor
 (defparameter alpha 0.01);; learning rate
-(defparameter weights '(0 0 0 0 0 0 0))
+(setf weights '(0 0 0 0 0 0 0 0))
 (defparameter count 0)
 
 
@@ -88,14 +87,8 @@
 
 (defun review-alpha()
   (setf count (+ count 1))
-  ;(if (> count 60) (setf alpha 0.1))
-  ;(if (> count 300) (setf alpha 0.05))
- ; (if (> count 400) (setf alpha 0.01))
-  ;(if (> count 500) (setf alpha 0.001))
   (if (> count 1500) (setf alpha 0.0001)) 
   (if (eq count 1) (setf alpha 0.01))
- ; (print alpha)
-  ;(print count)
 )
 
 ;;choose best action based in the getQValue(state, action)
@@ -103,14 +96,14 @@
   (setf actions (get-legal-actions))
   (setf best-action (nth 0 actions))
   (setf q (get-q-value-from-action (nth 0 actions)))
- (print "*********1************")
-  (loop for action in actions do (progn
-                                   (print action)
-                                   (print (get-q-value-from-action action))
-                                   (setf feat '(1/dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
-                                    (print (mapcar #'cons feat (get-features-act action)))
-                                   ))
-  (print "*********2************")
+ ;(print "*********1************")
+ ; (loop for action in actions do (progn
+      ;                             (print action)
+      ;                             (print (get-q-value-from-action action))
+     ;                              (setf feat '(1/dotDist dot PowerDot eatGhostDist eatGhost numGhost beEaten ActGhostDist))
+    ;                               (print (mapcar #'cons feat (get-features-act action)))
+   ;                                ))
+  ;(print "*********2************")
                                    
   (loop for action in actions do (if (>= (get-q-value-from-action action) q) (progn 
                                           (setf best-action action) 
@@ -134,39 +127,19 @@
   (setf action (jobject-lisp-value action))
   (setf next-state (mapcar #'(lambda (x) (/ x n)) (string-to-list (jobject-lisp-value next-state))))
   (setf reward (jobject-lisp-value reward))
-  (setf feat '(1/dotDist numGhost dot PowerDot eatGhost GhostDist beEaten))
-;  (print (mapcar #'cons feat state))
-;  (print reward)
-  ;;(print (mapcar #'cons feat next-state))
+  (setf feat '(1/dotDist dot PowerDot eatGhostDist eatGhost numGhost beEaten ActGhostDist))
   (setf max-q (get-qmax))
   (setf difference (- (+ reward (* gamma max-q)) (get-q-value-from-features state)))
   (setf weights (mapcar #'(lambda (w f) (+ w (* alpha difference f))) weights state))
-  (print (mapcar #'cons feat weights))
+ ; (print (mapcar #'cons feat weights))
 )
 
 ;;return Q(state,action) = w * featureVector
 (defun get-q-value-from-action(action)
-  ;(print "get-q-value-from-action")
-  ;(print (apply '+ (mapcar #'float (mapcar #'* (mapcar #'float weights) (mapcar #'float (get-features-act action))))))
- ; (setf features (get-features-act action))
-;  (setf sum 0)
-  ;(loop 
-      
-	;	for f in features
-	;	for w in weights do (progn
-          ;              (print "feature embaixo:")
-            ;            (print f)
-            ;            (print "weight embaixo:")
-               ;         (print w)
-                 ;       (setf sum (+ sum (* w f)))))
   (apply '+ (mapcar #'* weights (get-features-act action)))
- ; sum
-  
 )
 
 (defun get-q-value-from-features(state)
-  ;(print "get-q-value-from-features")
- ; (print (apply '+ (mapcar #'* weights state)))
   (apply '+ (mapcar #'* weights state))
 )
 
@@ -326,6 +299,6 @@
 )
 
 (defun reset-learning ()
-	(setf weights '(0 0 0 0 0 0 0))
+	(setf weights '(0 0 0 0 0 0 0 0))
     (setf count 0)
 )

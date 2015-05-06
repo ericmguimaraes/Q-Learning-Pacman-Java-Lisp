@@ -44,7 +44,8 @@ public class Dijkstra {
 
 
 	private ArrayList<Vertex> mazeToGraph(Maze maze) {
-		return createEdges(mazeToVertexs(maze), maze);
+		ArrayList<Vertex> v = mazeToVertexs(maze);
+		return createEdges(v, maze);
 	}
 
 	private ArrayList<Vertex> mazeToVertexs(Maze maze) {
@@ -126,7 +127,7 @@ public class Dijkstra {
 		for (int i = 0; i < maze.WIDTH; i++) {
 			for (int j = 0; j < maze.HEIGHT; j++) {
 				Vertex v = getVertexByPos(mazeGraph, i, j);
-				if (v != null && maze.isDot(i, j))
+				if (v != null && maze.isDotOrPowerDot(i, j))
 					if (v.minDistance < disClosestDot)
 						disClosestDot = (int) v.minDistance;
 			}
@@ -135,35 +136,27 @@ public class Dijkstra {
 	}
 	
 	
-	public int getDistanceToTheClosestEatableGhost(int x, int y, Ghost[] ghosts, Maze maze) {
+	public int getDistanceToTheClosestGhost(int x, int y, Ghost[] ghosts, Maze maze, boolean eatable) {
 		ArrayList<Vertex> mazeGraph = mazeToGraph(maze);
 		computePaths(getVertexByPos(mazeGraph, x, y));
 		
 		int disClosestGhost = maze.WIDTH * maze.HEIGHT;
 		for (int i = 0; i < ghosts.length; i++) {
-				Vertex v = getVertexByPos(mazeGraph, FeaturesExtraction.toHouseSize(ghosts[i].iX), FeaturesExtraction.toHouseSize(ghosts[i].iX));
-				if (v != null && ghosts[i].iStatus == Ghost.BLIND)
+			x = FeaturesExtraction.toHouseSize(ghosts[i].iX); y = FeaturesExtraction.toHouseSize(ghosts[i].iY);
+		//	if (ghosts[i].iStatus == Ghost.BLIND)System.err.println(x+"||"+y);	
+			Vertex v = getVertexByPos(mazeGraph, x, y);
+				if (v != null && ((eatable && ghosts[i].iStatus == Ghost.BLIND) || (!eatable && ghosts[i].iStatus == Ghost.OUT)))
 					if (v.minDistance < disClosestGhost)
 						disClosestGhost = (int) v.minDistance;
 		}
 		return disClosestGhost==maze.WIDTH * maze.HEIGHT?0:disClosestGhost;
 	}
 
-	/*
-	 * public static void main(String[] args) {
-	 * 
-	 * Vertex v0 = new Vertex(0, false); Vertex v1 = new Vertex(1, false);
-	 * Vertex v2 = new Vertex(2, false); Vertex v3 = new Vertex(3, false);
-	 * Vertex v4 = new Vertex(4, false);
-	 * 
-	 * v0.adjacencies = new Edge[]{ new Edge(v1, 5), new Edge(v2, 10), new
-	 * Edge(v3, 8) }; v1.adjacencies = new Edge[]{ new Edge(v0, 5), new Edge(v2,
-	 * 3), new Edge(v4, 7) }; v2.adjacencies = new Edge[]{ new Edge(v0, 10), new
-	 * Edge(v1, 3) }; v3.adjacencies = new Edge[]{ new Edge(v0, 8), new Edge(v4,
-	 * 2) }; v4.adjacencies = new Edge[]{ new Edge(v1, 7), new Edge(v3, 2) };
-	 * Vertex[] vertices = { v0, v1, v2, v3, v4 }; computePaths(v0); for (Vertex
-	 * v : vertices) { System.out.println("Distance to " + v + ": " +
-	 * v.minDistance); List<Vertex> path = getShortestPathTo(v);
-	 * System.out.println("Path: " + path); } }
-	 */
+	public float getDistance(int x1, int y1, int x2, int y2, Maze maze){
+		ArrayList<Vertex> mazeGraph = mazeToGraph(maze);
+		computePaths(getVertexByPos(mazeGraph, x1, y1));
+		Vertex v = getVertexByPos(mazeGraph, x2, y2);
+		return (float) (v==null?-1:v.minDistance);
+	}
+
 }

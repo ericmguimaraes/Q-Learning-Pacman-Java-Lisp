@@ -5,7 +5,7 @@ public class FeaturesExtraction {
 	private static FeaturesExtraction instance;
 
 	private GamePlayState game;
-	
+
 	private Dijkstra dijkstra;
 
 	private FeaturesExtraction(GamePlayState game) {
@@ -36,7 +36,7 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 1:
-			if (!game.maze.isBlocked(x, y-1)) {
+			if (!game.maze.isBlocked(x, y - 1)) {
 				result[1] = y - 1;
 			} else {
 				result[1] = y;
@@ -52,7 +52,7 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 3:
-			if (!game.maze.isBlocked(x , y+1)) {
+			if (!game.maze.isBlocked(x, y + 1)) {
 				result[1] = y + 1;
 			} else {
 				result[1] = y;
@@ -62,7 +62,7 @@ public class FeaturesExtraction {
 		}
 		return result;
 	}
-	
+
 	public int[] getNewPositionNOTHOUSESIZE(int x, int y, int action) {
 		int[] result = new int[2];
 		switch (action) {
@@ -75,7 +75,7 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 1:
-			if (!game.maze.isBlocked(toHouseSize(x), toHouseSize(y-16))) {
+			if (!game.maze.isBlocked(toHouseSize(x), toHouseSize(y - 16))) {
 				result[1] = y - 16;
 			} else {
 				result[1] = y;
@@ -91,7 +91,7 @@ public class FeaturesExtraction {
 			result[1] = y;
 			break;
 		case 3:
-			if (!game.maze.isBlocked(toHouseSize(x) , toHouseSize(y+16))) {
+			if (!game.maze.isBlocked(toHouseSize(x), toHouseSize(y + 16))) {
 				result[1] = y + 16;
 			} else {
 				result[1] = y;
@@ -103,31 +103,11 @@ public class FeaturesExtraction {
 	}
 
 	public float getClosestFoodDistance(int x, int y) {
-		/*int distance = Maze.HEIGHT + Maze.WIDTH;
-		for (int h = 0; h < Maze.HEIGHT; h++) {
-			for (int w = 0; w < Maze.WIDTH; w++) {
-				if (getManhatanDistance(x, y, w, h) < distance
-						&& game.maze.iMaze[h][w] == Maze.DOT)
-					distance = getManhatanDistance(x, y, w, h);
-			}
-		}
-		*/
 		int distance = dijkstra.getDistanceToTheClosestDot(x, y, game.maze);
-		if(distance<0)distance=0;
-		//System.err.println("DISTANCE: "+distance);
-
-		//float n = ((float) distance / 40);
-		float n;
-//		if(distance==0)
-//			n=1;
-//		else 
-			n = (float) 1/(distance+1);
-		//System.err.println(n);
-		//System.out.println("Distance: "+n);
-		return n; 
+		if (distance < 0)
+			distance = 0;
+		return (float) 1 / (distance + 1);
 	}
-
-	
 
 	public int getEatDot(int x, int y) {
 		if (game.maze.iMaze[y][x] == Maze.DOT) {
@@ -147,23 +127,26 @@ public class FeaturesExtraction {
 
 	public int isSomeGhostHere(int x, int y, int ghostStatus) {
 		for (int i = 0; i < game.ghosts.length; i++) {
-			if (game.ghosts[i].iStatus == ghostStatus
-					&& isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY,
-							8))
+			if (game.ghosts[i].iStatus == ghostStatus && isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY,10))
 				return 1;
 		}
 		return 0;
 	}
-	
+
 	public float getNumGhost1stepAway(int x, int y) {
 		float countGhost = 0;
 		for (int i = 0; i < game.ghosts.length; i++) {
 			if (game.ghosts[i].iStatus == Ghost.BLIND)
 				continue;
-			if (isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY, 20))
+			float d = dijkstra.getDistance(x, y,
+					toHouseSize(game.ghosts[i].iX),
+					toHouseSize(game.ghosts[i].iY), game.maze);
+			if ((d > -1 && d < 3)
+					|| isCollision(x, y, game.ghosts[i].iX, game.ghosts[i].iY,
+							20))
 				countGhost++;
 		}
-		float n = ((float) countGhost/4);
+		float n = ((float) countGhost / 4);
 		return n;
 	}
 
@@ -182,49 +165,79 @@ public class FeaturesExtraction {
 		return isSomeGhostHere(x, y, Ghost.OUT);
 	}
 
-	public float getClosestGhostToEatDistance(int x, int y) {
-//		int distance = Maze.HEIGHT*16 + Maze.WIDTH*16, count = 0;
-//
-//		for (int i = 0; i < game.ghosts.length; i++) {
-//			if (game.ghosts[i].iStatus == Ghost.BLIND) {
-//				int newdist = getManhatanDistance(x, y, game.ghosts[i].iX, game.ghosts[i].iY);
-//				if (newdist < distance)
-//					distance = newdist;
-//				count++;
-//			}
-//		}
-		//if(count != 0)System.out.println(distance);
-		int distance = dijkstra.getDistanceToTheClosestEatableGhost(x, y, game.ghosts, game.maze);
-		//float n = ((float) distance /  50);
-//		int c = 0;
-//		for (Ghost g : game.ghosts) {
-//			if(g.iStatus == Ghost.BLIND) c++;
-//		}
-//		float n;
-//		if(c==0)
-//			n=0;
-//		else
-//			n = (float) 1/(distance+1);
-//		
-		return (float) distance/40;//count != 0 ? n : 0;
+	public float getDistGhostBlind(int x, int y) {
+		int distance = dijkstra.getDistanceToTheClosestGhost(x, y, game.ghosts,
+				game.maze, true);
+		int c = 0;
+		for (Ghost g : game.ghosts) {
+			if (g.iStatus == Ghost.BLIND)
+				c++;
+		}
+
+		// System.err.println(distance+":"+c);
+		float n;
+		if (c == 0)
+			n = 0;
+		else
+			if(distance==0)
+				n = 1;
+			else
+				n = (float) 1 / distance;
+
+		return n;
 	}
 
-	public int getisTurningBack(int newdir) {
-		switch (game.lastAction) {
-		case 0:
-			if (newdir == 2)
-				return 1;
-		case 1:
-			if (newdir == 3)
-				return 1;
-		case 2:
-			if (newdir == 0)
-				return 1;
-		case 3:
-			if (newdir == 1)
-				return 1;
+//	public float getDistGhostActive(int x, int y) {
+//		int distance = dijkstra.getDistanceToTheClosestGhost(x, y, game.ghosts,
+//				game.maze, false);
+//		int c = 0;
+//		for (Ghost g : game.ghosts) {
+//			if (g.iStatus == Ghost.OUT)
+//				c++;
+//		}
+//
+//		// System.err.println(distance+":"+c);
+//		int distanceThatIcare = 4;
+//		float n;
+//		if (c == 0 || (distance > 0 && distance < distanceThatIcare))
+//			n = 0;
+//		else
+//			if(distance==0)
+//				n = 1;
+//			else
+//				n = (float) distanceThatIcare / distance;
+//
+//		return n;
+//	}
+	
+	public float getDistGhostActive(int x, int y) {
+		int sum = 0;
+		int c = 0;
+		//boolean ghostHere = false;
+		for (Ghost g : game.ghosts) {
+			if (g.iStatus == Ghost.OUT){
+				float d = dijkstra.getDistance(x, y, toHouseSize(g.iX), toHouseSize(g.iY), game.maze);
+				sum = (int) (sum + d);
+				c++;
+				//if(d==0)ghostHere = true;
+			}
 		}
-		return 0;
+		
+	//	System.err.println("C:"+c);
+	//	System.err.println("SOMA:"+sum);
+
+		float n;
+		if (c == 0)
+			n = 0;
+		else
+			if(sum==0)
+				n = 1;
+			else
+				n = (float) c/sum;
+
+	//	if (ghostHere) n=1;
+	//	System.err.println("N:"+n);
+		return n;
 	}
 
 	public static int toHouseSize(int x) {
@@ -245,21 +258,25 @@ public class FeaturesExtraction {
 		int newx = toHouseSize(x), newy = toHouseSize(y);
 		return getFeaturesAUX(x, y, newx, newy);
 	}
-	
+
 	public PacmanFeatures getFeaturesFromHouseSize(int x, int y) {
-		return getFeaturesAUX(x*16, y*16, x, y);
+		return getFeaturesAUX(x * 16, y * 16, x, y);
 	}
 
 	private PacmanFeatures getFeaturesAUX(int x, int y, int newx, int newy) {
 		PacmanFeatures result = new PacmanFeatures();
-		boolean follower = getBeEaten(x, y)==1 || getNumGhost1stepAway(x, y)>0;
-		result.setClosestFoodDistance(follower?0:getClosestFoodDistance(newx, newy));
-		result.setClosestGhostToEatDistance(follower?0:getClosestGhostToEatDistance(newx, newy));
-		result.setEatDot(follower?0:getEatDot(newx, newy));
-		result.setEatGhost(follower?0:getEatGhost(x, y));
-		result.setEatPowerDot(follower?0:getEatPowerDot(newx, newy));
-		result.setNumGhost1stepAway(getNumGhost1stepAway(x, y));
+		boolean follower = false;// getBeEaten(x, y)==1 ||
+									// getNumGhost1stepAway(newx, newy)>0;
+		result.setDistDot(follower ? 0 : getClosestFoodDistance(
+				newx, newy));
+		result.setClosestGhostToEatDistanceDividedByOne(follower ? 0
+				: getDistGhostBlind(newx, newy));
+//		result.setEatDot(follower ? 0 : getEatDot(newx, newy));
+//		result.setEatGhost(follower ? 0 : getEatGhost(x, y));
+//		result.setEatPowerDot(follower ? 0 : getEatPowerDot(newx, newy));
+		result.setNumGhost1stepAway(getNumGhost1stepAway(newx, newy));
 		result.setBeEaten(getBeEaten(x, y));
+		result.setDistGhostActive(getDistGhostActive(newx, newy));
 		return result;
 	}
 
