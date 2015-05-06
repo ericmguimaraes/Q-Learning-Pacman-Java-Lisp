@@ -1,0 +1,23 @@
+Mode: Human Try: 2 AVG Level: 1.0 Rounds: 1 AVG Score: 8680.0
+Mode: Human Try: 1 AVG Level: 0.5 Rounds: 2 AVG Score: 3195.0
+Mode: QLearning Try: 20 AVG Level: 1.2707424 Rounds: 229 AVG Score: 7607.5107
+Mode: QLearning Try: 19 AVG Level: 1.231441 Rounds: 229 AVG Score: 7493.9736
+Mode: QLearning Try: 18 AVG Level: 1.2052401 Rounds: 229 AVG Score: 7419.476
+Mode: QLearning Try: 17 AVG Level: 1.2270743 Rounds: 229 AVG Score: 7270.2183
+Mode: QLearning Try: 16 AVG Level: 1.209607 Rounds: 229 AVG Score: 7354.498
+Mode: QLearning Try: 15 AVG Level: 1.2401747 Rounds: 229 AVG Score: 7458.515
+Mode: QLearning Try: 14 AVG Level: 1.2925764 Rounds: 229 AVG Score: 7695.546
+Mode: QLearning Try: 13 AVG Level: 1.2227074 Rounds: 229 AVG Score: 7513.6245
+Mode: QLearning Try: 12 AVG Level: 1.2925764 Rounds: 229 AVG Score: 7703.712
+Mode: QLearning Try: 11 AVG Level: 1.2217392 Rounds: 230 AVG Score: 7285.8696
+Mode: QLearning Try: 10 AVG Level: 1.1695652 Rounds: 230 AVG Score: 7110.5654
+Mode: QLearning Try: 9 AVG Level: 1.2043478 Rounds: 230 AVG Score: 7094.1304
+Mode: QLearning Try: 8 AVG Level: 1.2130435 Rounds: 230 AVG Score: 7231.5654
+Mode: QLearning Try: 7 AVG Level: 1.2217392 Rounds: 230 AVG Score: 7204.826
+Mode: QLearning Try: 6 AVG Level: 1.2380953 Rounds: 231 AVG Score: 7362.6406
+Mode: QLearning Try: 5 AVG Level: 1.2121212 Rounds: 231 AVG Score: 7322.5107
+Mode: QLearning Try: 4 AVG Level: 1.1428572 Rounds: 231 AVG Score: 6910.7793
+Mode: QLearning Try: 3 AVG Level: 1.1896552 Rounds: 232 AVG Score: 6942.8447
+Mode: QLearning Try: 2 AVG Level: 1.2103004 Rounds: 233 AVG Score: 6734.678
+Mode: QLearning Try: 1 AVG Level: 0.5940171 Rounds: 234 AVG Score: 6528.974
+
